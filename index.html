@@ -61,10 +61,10 @@
       <div class="outer">
         <section id="main">
   
-    <article id="post-hello-world" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-red-envelope-assignment-algorithm" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
-    <a href="/2016/10/01/hello-world/" class="article-date">
-  <time datetime="2016-09-30T23:24:32.648Z" itemprop="datePublished">2016-10-01</time>
+    <a href="/2016/10/07/red-envelope-assignment-algorithm/" class="article-date">
+  <time datetime="2016-10-07T06:55:48.080Z" itemprop="datePublished">10/07 2016</time>
 </a>
     
   </div>
@@ -75,7 +75,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2016/10/01/hello-world/">Hello World</a>
+      <a class="article-title" href="/2016/10/07/red-envelope-assignment-algorithm/">一种红包分配算法及其实现</a>
     </h1>
   
 
@@ -83,12 +83,391 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p><strong>我是李孟响，欢迎访问我的博客。这里记录我在工作、学习中的感悟，方便自己查看，也希望对您有所帮助。</strong></p>
+        <p>该算法适用于多人抢红包的场景，可动态调整红包分配的均匀程度。红包余额需大于红包剩余份数，分配的金额为整数，如果需要分配成小数，将红包余额乘以100，分配结果除以100即可。</p>
+<h2 id="算法概述"><a href="#算法概述" class="headerlink" title="算法概述"></a>算法概述</h2><p>红包余额R，红包剩余份数D，离散程度N（取值范围[0,1)）,分配金额G</p>
+<ol>
+<li>D=1，G=R</li>
+<li>D&gt;1，按(R/D) + random(-(R/D)*N, (R/D)*N)将R分解为一个列表，random方法取[a,b]范围的随机值</li>
+<li>从第2步得到的列表中随机选择一个作为G</li>
+</ol>
+<p>容易看出</p>
+<ul>
+<li>N取0时，每个人分配到的金额相等，都是R/D（最后一份可能不等于该值）</li>
+<li>N取1时，可能出现分配金额为0的情况，所以N的取值应小于1</li>
+<li>N的值越大，分配金额的分布越不平均</li>
+<li>第3步使得分配金额与抢红包的先后顺序无关</li>
+</ul>
+<h2 id="Python实现"><a href="#Python实现" class="headerlink" title="Python实现"></a>Python实现</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> random</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">avg</span><span class="params">(remain, dv)</span>:</span></div><div class="line">    <span class="keyword">return</span> remain / dv</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">randNoise</span><span class="params">(noise, expected = <span class="number">0</span>)</span>:</span></div><div class="line">    <span class="keyword">return</span> random.randint(expected - noise, expected + noise)</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">divideToList</span><span class="params">(remain, dv, noiseRate)</span>:</span></div><div class="line">    divided = []</div><div class="line">    <span class="keyword">while</span> dv &gt; <span class="number">0</span>:</div><div class="line">        <span class="keyword">if</span> dv == <span class="number">1</span>:</div><div class="line">            get = remain</div><div class="line">        <span class="keyword">else</span>:</div><div class="line">            av = avg(remain, dv)</div><div class="line">            get = av + randNoise(int(av * noiseRate))</div><div class="line">        divided.append(get)</div><div class="line">        dv = dv - <span class="number">1</span></div><div class="line">        remain = remain - get</div><div class="line">    <span class="keyword">return</span> divided</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">assignToList</span><span class="params">(remain, dv, noiseRate)</span>:</span></div><div class="line">    L = []</div><div class="line">    <span class="keyword">while</span> dv &gt; <span class="number">0</span>:</div><div class="line">        div = divideToList(remain, dv, noiseRate)</div><div class="line">        g = random.choice(div)</div><div class="line">        L.append(g)</div><div class="line">        dv = dv<span class="number">-1</span></div><div class="line">        remain = remain - g</div><div class="line">    <span class="keyword">return</span> L</div></pre></td></tr></table></figure>
+<h2 id="测试代码"><a href="#测试代码" class="headerlink" title="测试代码"></a>测试代码</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> sys</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">testAssignment</span><span class="params">(L, dv)</span>:</span></div><div class="line">    <span class="keyword">if</span> len(L) != dv:</div><div class="line">        <span class="keyword">print</span> <span class="string">'Bad #not average'</span></div><div class="line">        <span class="keyword">return</span> <span class="keyword">False</span></div><div class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> L:</div><div class="line">        <span class="keyword">if</span> i &lt;= <span class="number">0</span>:</div><div class="line">            <span class="keyword">print</span> <span class="string">'Bad #negative or zero'</span></div><div class="line">            <span class="keyword">return</span> <span class="keyword">False</span></div><div class="line">    <span class="keyword">return</span> <span class="keyword">True</span></div><div class="line">        </div><div class="line">remain = int(sys.argv[<span class="number">1</span>])</div><div class="line">dv = int(sys.argv[<span class="number">2</span>])</div><div class="line">noiseRate = float(sys.argv[<span class="number">3</span>])</div><div class="line">testTimes = int(sys.argv[<span class="number">4</span>])</div><div class="line">    </div><div class="line"><span class="keyword">while</span> testTimes &gt; <span class="number">0</span>:</div><div class="line">    L = assignToList(remain, dv, noiseRate)</div><div class="line">    <span class="keyword">if</span> testAssignment(L, dv) == <span class="keyword">True</span>:</div><div class="line">        <span class="keyword">print</span> <span class="string">'Good'</span></div><div class="line">    <span class="keyword">print</span> L</div><div class="line">    testTimes = testTimes - <span class="number">1</span></div></pre></td></tr></table></figure>
+<p><strong>输出</strong><br><figure class="highlight bash"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line"><span class="comment"># python red_env.py 500 10 0.9 10</span></div><div class="line">Good</div><div class="line">[33, 94, 62, 9, 42, 39, 19, 77, 83, 42]</div><div class="line">Good</div><div class="line">[27, 38, 37, 133, 10, 48, 54, 113, 21, 19]</div><div class="line">Good</div><div class="line">[42, 84, 71, 61, 47, 51, 36, 59, 14, 35]</div><div class="line">Good</div><div class="line">[74, 38, 17, 94, 59, 65, 100, 8, 11, 34]</div><div class="line">Good</div><div class="line">[31, 44, 46, 60, 43, 38, 16, 64, 112, 46]</div><div class="line">Good</div><div class="line">[12, 30, 43, 109, 29, 43, 51, 22, 140, 21]</div><div class="line">Good</div><div class="line">[27, 81, 143, 36, 12, 12, 6, 63, 20, 100]</div><div class="line">Good</div><div class="line">[13, 16, 18, 96, 8, 65, 63, 55, 12, 154]</div><div class="line">Good</div><div class="line">[36, 49, 60, 62, 87, 53, 16, 32, 70, 35]</div><div class="line">Good</div><div class="line">[98, 17, 43, 61, 38, 57, 63, 77, 43, 3]</div></pre></td></tr></table></figure></p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://limen.github.io/2016/10/01/hello-world/" data-id="citqeyafv00003vs8xmznivct" class="article-share-link">Share</a>
+      <a data-url="http://limen.github.io/2016/10/07/red-envelope-assignment-algorithm/" data-id="citzf5e5e0005vss8e1d6tpxj" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/算法/">算法</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-quick-sort-and-its-testing" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/10/07/quick-sort-and-its-testing/" class="article-date">
+  <time datetime="2016-10-07T06:54:46.843Z" itemprop="datePublished">10/07 2016</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/10/07/quick-sort-and-its-testing/">快速排序算法及其测试算法的原理与实现</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="快速排序简介"><a href="#快速排序简介" class="headerlink" title="快速排序简介"></a>快速排序简介</h2><p>快速排序是一种分治的排序算法，是实践中最快的排序算法，理论上的时间复杂度为O(N*lgN)，最差情况的时间复杂度为O(N^2)，但稍加努力就可避免这种情况。</p>
+<p>快速排序的步骤</p>
+<ol>
+<li>如果列表中的元素为0或1个，则返回</li>
+<li>选取标记值p</li>
+<li>将列表分为两部分s1、s2，需满足条件：s1中的元素均小于或等于p，s2中的元素均大于等于p，得到s1+p+s2</li>
+<li>对s1、s2重复2、3步骤，最终得到排序结果</li>
+</ol>
+<p>从上面的步骤可以看出，快速排序需要递归运算。</p>
+<h2 id="Python实现"><a href="#Python实现" class="headerlink" title="Python实现"></a>Python实现</h2><p>采用三值取中间值的方法选取标记值，从而避免最差情况。</p>
+<figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div></pre></td><td class="code"><pre><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">median3</span><span class="params">(L,a,b,c)</span>:</span></div><div class="line">    <span class="keyword">if</span> L[a] &gt;= L[b] <span class="keyword">and</span> L[b] &gt;= L[c]:</div><div class="line">        mid = L[b]</div><div class="line">        i = b</div><div class="line">    <span class="keyword">elif</span> L[a] &lt;= L[b] <span class="keyword">and</span> L[b] &lt;= L[c]:</div><div class="line">        mid = L[b]</div><div class="line">        i = b</div><div class="line">    <span class="keyword">elif</span> L[b] &gt;= L[a] <span class="keyword">and</span> L[a] &gt;= L[c]:</div><div class="line">        mid = L[a]</div><div class="line">        i = a</div><div class="line">    <span class="keyword">elif</span> L[b] &lt;= L[a] <span class="keyword">and</span> L[a] &lt;= L[c]:</div><div class="line">        mid = L[a]</div><div class="line">        i = a</div><div class="line">    <span class="keyword">else</span>:</div><div class="line">        mid = L[c]</div><div class="line">        i = c</div><div class="line">    <span class="keyword">return</span> [mid,i]  </div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">swap</span><span class="params">(L, i, j)</span>:</span></div><div class="line">    tmp = L[i]</div><div class="line">    L[i] = L[j]</div><div class="line">    L[j] = tmp</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">quickSort</span><span class="params">(L, low, high)</span>:</span></div><div class="line">    <span class="keyword">if</span> low &lt; high:</div><div class="line">        i = low</div><div class="line">        j = high</div><div class="line">        meta = median3(L, i, (i+j)/<span class="number">2</span>, j)</div><div class="line">        pivot = meta[<span class="number">0</span>]</div><div class="line">        pivotPos = meta[<span class="number">1</span>]</div><div class="line">        <span class="comment"># move pivot to the right end</span></div><div class="line">        swap(L, pivotPos, high) </div><div class="line">        </div><div class="line">        <span class="keyword">while</span> i &lt; j:</div><div class="line">            <span class="comment"># pivot on the right end, starting from left</span></div><div class="line">            <span class="keyword">while</span> i &lt; j <span class="keyword">and</span> L[i] &lt;= pivot:</div><div class="line">                i = i+<span class="number">1</span></div><div class="line">            <span class="keyword">while</span> j &gt; i <span class="keyword">and</span> L[j] &gt;= pivot:</div><div class="line">                j = j<span class="number">-1</span></div><div class="line">            swap(L, i, j)</div><div class="line">        <span class="comment"># move pivot to right position</span></div><div class="line">        swap(L, i, high)</div><div class="line">        </div><div class="line">        quickSort(L, low, i<span class="number">-1</span>)</div><div class="line">        quickSort(L, i+<span class="number">1</span>, high)</div></pre></td></tr></table></figure>
+<h2 id="测试算法"><a href="#测试算法" class="headerlink" title="测试算法"></a>测试算法</h2><p>排序结果正确，需满足条件</p>
+<ol>
+<li>列表除元素顺序变化外，没有别的变化</li>
+<li>列表中的元素是有序的</li>
+</ol>
+<p>条件2容易实现，重点关注条件1</p>
+<p><strong>如何确保列表除元素顺序变化外，没有别的变化？</strong></p>
+<p>列表L1、L2满足以下三个条件即可</p>
+<ol>
+<li>L1、L2中的元素数量相同</li>
+<li>L1、L2的元素组成的集合相同（L1中的元素都在L2中，反之也成立）</li>
+<li>L1、L2中元素的和相同</li>
+</ol>
+<p>例如，列表L1=[2,3,2,2,3]，顺序打乱后得到L2=[2,2,3,3,2]，此时L1、L2满足以上三个条件。如果对L2进行以下操作，均会使其中的一个或多个条件不成立。</p>
+<ul>
+<li>添加/删除元素</li>
+<li>修改元素值</li>
+</ul>
+<h2 id="测试算法实现"><a href="#测试算法实现" class="headerlink" title="测试算法实现"></a>测试算法实现</h2><figure class="highlight python"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">import</span> sys</div><div class="line"><span class="keyword">import</span> random</div><div class="line"><span class="keyword">import</span> copy</div><div class="line"></div><div class="line"><span class="comment"># condition 2</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">diff2List</span><span class="params">(l1,l2)</span>:</span></div><div class="line">    diff = [val <span class="keyword">for</span> val <span class="keyword">in</span> l1 <span class="keyword">if</span> val <span class="keyword">not</span> <span class="keyword">in</span> l2]</div><div class="line">    <span class="keyword">for</span> v <span class="keyword">in</span> [val <span class="keyword">for</span> val <span class="keyword">in</span> l2 <span class="keyword">if</span> val <span class="keyword">not</span> <span class="keyword">in</span> l1]:</div><div class="line">        diff.append(v)</div><div class="line">    <span class="keyword">return</span> diff</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">isListSorted</span><span class="params">(L)</span>:</span></div><div class="line">    i = <span class="number">0</span></div><div class="line">    <span class="keyword">while</span> i &lt; len(L) - <span class="number">2</span>:</div><div class="line">        <span class="keyword">if</span> L[i] &lt;= L[i+<span class="number">1</span>]:</div><div class="line">            i = i+<span class="number">1</span></div><div class="line">        <span class="keyword">else</span>:</div><div class="line">            <span class="keyword">return</span> [i, L[i], L[i+<span class="number">1</span>]]</div><div class="line">    <span class="keyword">return</span> <span class="keyword">True</span></div><div class="line"></div><div class="line"><span class="comment"># condition 3</span></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">sumList</span><span class="params">(L)</span>:</span></div><div class="line">    sum = <span class="number">0</span></div><div class="line">    <span class="keyword">for</span> i <span class="keyword">in</span> L:</div><div class="line">        sum = sum + i</div><div class="line">    <span class="keyword">return</span> sum</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">def</span> <span class="title">randomList</span><span class="params">(length, maximum)</span>:</span></div><div class="line">    l = []</div><div class="line">    i = <span class="number">0</span></div><div class="line">    <span class="keyword">while</span> i &lt; length:</div><div class="line">        l.append(random.randint(<span class="number">0</span>, maximum))</div><div class="line">        i = i+<span class="number">1</span></div><div class="line">    <span class="keyword">return</span> l</div><div class="line"></div><div class="line"><span class="comment">#</span></div><div class="line"><span class="comment"># Test usage: python &lt;script_path&gt; &lt;test_times&gt; &lt;min_list_length&gt; &lt;max_list_length&gt; &lt;max_list_element_value&gt;</span></div><div class="line"><span class="comment">#</span></div><div class="line"></div><div class="line">testTimes = int(sys.argv[<span class="number">1</span>])</div><div class="line">minLength = int(sys.argv[<span class="number">2</span>])</div><div class="line">maxLength = int(sys.argv[<span class="number">3</span>])</div><div class="line">maxValue = int(sys.argv[<span class="number">4</span>])</div><div class="line"></div><div class="line"><span class="keyword">for</span> i <span class="keyword">in</span> range(testTimes):</div><div class="line">    L = randomList(random.randint(minLength, maxLength), maxValue)</div><div class="line">    <span class="keyword">print</span> <span class="string">'Test round #'</span> + str(i)</div><div class="line">    <span class="comment"># original</span></div><div class="line">    <span class="keyword">print</span> L</div><div class="line">    <span class="comment"># deep copy for test</span></div><div class="line">    tmpList = copy.deepcopy(L)</div><div class="line">    quickSort(L, <span class="number">0</span>, len(L) - <span class="number">1</span>)</div><div class="line">    <span class="keyword">if</span> len(L) != len(tmpList) <span class="keyword">or</span> diff2List(L, tmpList) != [] <span class="keyword">or</span> sumList(L) != sumList(tmpList):</div><div class="line">        <span class="keyword">print</span> <span class="string">'Bad #not coherent'</span></div><div class="line">        <span class="keyword">break</span></div><div class="line">    <span class="keyword">else</span>:</div><div class="line">        sorted = isListSorted(L)</div><div class="line">        <span class="keyword">if</span> sorted != <span class="keyword">True</span>:</div><div class="line">            <span class="keyword">print</span> <span class="string">'Bad #not sorted'</span></div><div class="line">            <span class="keyword">print</span> sorted</div><div class="line">            <span class="keyword">break</span></div><div class="line">    <span class="comment"># after sort</span></div><div class="line">    <span class="keyword">print</span> L</div></pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://limen.github.io/2016/10/07/quick-sort-and-its-testing/" data-id="citzf5e4w0004vss8vo0av0lv" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/快速排序/">快速排序</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-mongodb-or-mysql" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/10/07/mongodb-or-mysql/" class="article-date">
+  <time datetime="2016-10-07T06:53:05.335Z" itemprop="datePublished">10/07 2016</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/10/07/mongodb-or-mysql/">MongoDB还是MySQL？</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h1><p>用户发布一条动态，动态中可以包含由“##”包裹的话题内容。</p>
+<p>一条动态可以包含多个话题，一个话题可以关联多个动态。</p>
+<h1 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h1><p><strong>话题表</strong></p>
+<ul>
+<li>话题id</li>
+<li>话题内容</li>
+<li>创建话题的用户id</li>
+</ul>
+<p><strong>动态话题关联表</strong></p>
+<ul>
+<li>话题id</li>
+<li>动态id</li>
+</ul>
+<p>DBA看到创建数据表的邮件后发问，为什么用MySQL，而不用MongoDB？</p>
+<p><strong>他的理由</strong></p>
+<ul>
+<li>MongoDB在文档数达到上亿时仍能保持良好性能，MySQL没有这么强大</li>
+</ul>
+<p><strong>我为什么采用MySQL？</strong></p>
+<ul>
+<li>两张表的schema是比较固定的</li>
+<li>两张表通过话题id构成关联关系，MySQL支持关联查询，MongoDB不支持</li>
+<li>MySQL按照表的schema对写操作进行约束，MongoDB相反，因为MongoDB的特点就是schemaless</li>
+</ul>
+<h1 id="关于数据量的问题"><a href="#关于数据量的问题" class="headerlink" title="关于数据量的问题"></a>关于数据量的问题</h1><p>在我的另一篇文章<a href="http://www.jianshu.com/p/4cdb59716483" target="_blank" rel="external">数据库设计的重要性与原则</a>，根据其中的<strong>适度超前</strong>原则，从目前的每日动态发布量来看，这两张表的数据量在5年内不会达到上亿。</p>
+<p>如果达到上亿的数据量，是否真的需要切换到MongoDB？我看没这个必要。即使是MongoDB，数据量达到一定的量之后，读写性能也会急剧下降。</p>
+<p>我们有更好的方案来解决读写性能下降的问题，但这是另外一个话题了，本文不做探讨。</p>
+<p><strong>DBA这种负责任和敢于发问的态度值得提倡。</strong><br><strong>我的理由充分吗？</strong></p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://limen.github.io/2016/10/07/mongodb-or-mysql/" data-id="citzf5e4q0003vss8xu2mwwhj" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/数据库/">数据库</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-database-outernal-cache-and-read-speed-improvement" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/10/07/database-outernal-cache-and-read-speed-improvement/" class="article-date">
+  <time datetime="2016-10-07T06:51:10.241Z" itemprop="datePublished">10/07 2016</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/10/07/database-outernal-cache-and-read-speed-improvement/">为数据库添加外部缓存带来的性能提升分析</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="数据库"><a href="#数据库" class="headerlink" title="数据库"></a>数据库</h2><p>指持久化数据库，如</p>
+<ul>
+<li>mysql</li>
+<li>mongodb</li>
+</ul>
+<h2 id="缓存"><a href="#缓存" class="headerlink" title="缓存"></a>缓存</h2><p>指内存型的数据存储，如</p>
+<ul>
+<li>redis</li>
+<li>memcached</li>
+</ul>
+<p>一个良好的缓存策略需兼顾</p>
+<ul>
+<li>命中率</li>
+<li>缓存数据与数据库数据的一致性</li>
+</ul>
+<h2 id="对命中率的兼顾"><a href="#对命中率的兼顾" class="headerlink" title="对命中率的兼顾"></a>对命中率的兼顾</h2><p>多大的命中率是好的？</p>
+<p>用数学知识来分析这个问题，先设定几个关键的参数</p>
+<ul>
+<li>T(c)：读一次缓存所需时间</li>
+<li>T(d)：读一次数据库所需时间</li>
+<li>G：缓存命中率</li>
+</ul>
+<p>一次数据读取所需的时间的期望值为：<br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">T(c)*G + (T(c)+T(d))*(<span class="number">1</span>-G)</div></pre></td></tr></table></figure></p>
+<p>增加数据库缓存的目标为提高数据读取速度，可以归结为一个表达式<br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">T(c)*G + (<span class="number">1</span>-G)*(T(c)+T(d)) &lt; T(d)</div></pre></td></tr></table></figure></p>
+<p>等同于<br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">T(c) - T(d)*G &lt; <span class="number">0</span></div></pre></td></tr></table></figure></p>
+<p>读取速度提升的比值为<br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">(T(d)*G - T(c))/T(d)</div></pre></td></tr></table></figure></p>
+<p>假如，T(d)=50ms，T(c)=10ms，G=0.6，读取速度提升比值为<br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">(<span class="number">50</span>*<span class="number">0.6</span> - <span class="number">10</span>)/<span class="number">50</span> = <span class="number">0.4</span></div></pre></td></tr></table></figure></p>
+<p>化为百分比也就是40%。</p>
+<p>假如，T(d)=50ms，T(c)=10ms，G的值必须大于<br><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">G = T(c)/T(d) = <span class="number">0.2</span></div></pre></td></tr></table></figure></p>
+<p>才能期望读取速度得到提升。</p>
+<p>可以看出</p>
+<blockquote>
+<p>加入缓存不一定能够提升读取性能，这取决于缓存读取速度、数据库读取速度以及缓存的命中率。</p>
+</blockquote>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://limen.github.io/2016/10/07/database-outernal-cache-and-read-speed-improvement/" data-id="citzf5e4a0001vss8zw0mgb8n" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/数据库/">数据库</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/缓存/">缓存</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-database-design-principles" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/10/07/database-design-principles/" class="article-date">
+  <time datetime="2016-10-07T06:49:28.178Z" itemprop="datePublished">10/07 2016</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/10/07/database-design-principles/">数据库设计的重要性与几个原则</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>随着工作经验的积累，我日益感觉到，对一名程序员来说，拥有良好的数据库设计能力是很重要的，甚至是最重要的。</p>
+<p>程序员界有一句著名的话</p>
+<blockquote>
+<p>Talk is cheap, show me the code</p>
+</blockquote>
+<p>把这句话演变一下，就成了</p>
+<blockquote>
+<p>Code is boring, show me the data structure</p>
+</blockquote>
+<p>数据库的种类很多，对于像作者这样的web后端程序员来说，可以把范围缩小到关系型数据库、非关系型数据库与NoSQL数据库。</p>
+<h1 id="数据结构为何如此重要"><a href="#数据结构为何如此重要" class="headerlink" title="数据结构为何如此重要"></a>数据结构为何如此重要</h1><p><strong>一切代码都是围绕数据结构运行的。</strong><br>客户端展现的动态数据，都是存储在数据库中，这对程序员来说一定是常识了。拿你正在浏览的这个页面为例，文章的作者、标题、正文、评论、喜欢等等，只要你打开任意两篇文章，两个页面不一样的地方，几乎都是因为在数据库中存储的内容不同。</p>
+<p>良好的数据结构可以提升性能，使代码变得简单、清晰。数据结构清晰了，围绕着数据运行的代码自然就清晰了。</p>
+<h1 id="数据库设计需考虑的因素"><a href="#数据库设计需考虑的因素" class="headerlink" title="数据库设计需考虑的因素"></a>数据库设计需考虑的因素</h1><p>提到数据库设计原则，首先会想到第一、第二、第三范式，这些理论能了解最好，但这不是本文探讨的主题。</p>
+<p>面对一个具体的应用场景，设计数据库时应考虑哪些因素？为了能够言之有物，我们拿<a href="www.jianshu.com">简书</a>的文章页面来现身说法。</p>
+<h3 id="当前可用性"><a href="#当前可用性" class="headerlink" title="当前可用性"></a>当前可用性</h3><p>数据结构的设计要能达到应用场景的要求，这是最基本的。举个例子，这篇文章的正文存储在了数据表中的某个字段，该字段的长度被设定为1000字，这显然不能满足应用场景的要求，文章写到这里已经超过了1000字（估计的，我没有数）。</p>
+<h3 id="适当超前"><a href="#适当超前" class="headerlink" title="适当超前"></a>适当超前</h3><p>超前到什么程度需要根据对应用的预期来定。拿QQ来说，马化腾最初肯定预见不到QQ能有目前的用户量与活跃度，毕竟那是近20年前的事情了。</p>
+<p>对于本文设定的应用场景，我们把超前设定为网站的文章数量达到了千万级。这时如果只把文章存在一张数据表里，读写性能必然是会急剧下降的，这必然会导致用户体验变差，用户流失。老板不能容忍，DBA也不能容忍。</p>
+<p>合理的解决方案之一是分为两张数据表，一张存储热门文章，另一张存储非热门文章。毕竟热门文章占少数，热门文章的加载速度相对就更快了。还有别的解决方案吗？肯定有，留给您自己思考。</p>
+<h3 id="分离易变与不易变部分"><a href="#分离易变与不易变部分" class="headerlink" title="分离易变与不易变部分"></a>分离易变与不易变部分</h3><p>对于一篇文章来说，哪些是易变的，哪些是不易变（不变）的？</p>
+<h4 id="不易变（不变）"><a href="#不易变（不变）" class="headerlink" title="不易变（不变）"></a>不易变（不变）</h4><ul>
+<li>作者</li>
+<li>标题</li>
+<li>正文（字数）</li>
+<li>发布时间</li>
+<li>更新时间</li>
+</ul>
+<h4 id="易变"><a href="#易变" class="headerlink" title="易变"></a>易变</h4><ul>
+<li>阅读次数</li>
+<li>评论</li>
+<li>喜欢该文章的用户与数量</li>
+</ul>
+<p>拆分的好处在于，首先数据结构更清晰了，其次可以提高读写性能，当文章有了新评论，只需更新存放评论的数据表。如果不拆分，需要更新的记录占用的磁盘空间很大，这对磁盘IO速度是个考验。</p>
+<p>对于拆分出的部分，可以继续运用这些原则进行设计。</p>
+<h3 id="应对可能出现的新需求"><a href="#应对可能出现的新需求" class="headerlink" title="应对可能出现的新需求"></a>应对可能出现的新需求</h3><p>互联网应用的迭代周期很短，设计数据结构时应考虑到可能出现的新需求。拿喜欢该文章的用户与数量举例。</p>
+<p>为了达到应用的要求，最简单的方式是将这些用户放在一条记录里，存储的字段可以是数组类型。这样设计，喜欢文章的用户信息与用户数量都能轻易获取，读写性能也很好。</p>
+<p>某天，产品经理找到了你：“商量个新需求呗”，在文章下方加个模块，就叫“喜欢该文章的人还喜欢了”。你就懵逼了，没法破，除非重新设计数据结构，然后就带来了迁移数据一系列事情。其实这个需求挺合理的，说得高大上一点，这叫“精准推荐”。</p>
+<p>很明显，将用户放在数组里只能支持“查询喜欢某文章的用户”，不支持“查询某用户喜欢的文章”。</p>
+<h3 id="适当的冗余"><a href="#适当的冗余" class="headerlink" title="适当的冗余"></a>适当的冗余</h3><p>或许你已经注意到了，文章的标题下面有这篇文章的字数。计算文章的字数，有两个时机：</p>
+<ul>
+<li>保存文章时</li>
+<li>读取文章时</li>
+</ul>
+<p>后者的优势在于数据表中少了一个字段，而且这个字段不是必需的。哪个时机更好？个人觉得前者更好，理由如下：</p>
+<ul>
+<li>计算长篇文章的字数是比较耗时的，应尽量减少计算次数</li>
+<li>总体来看，文章的保存次数远小于读取次数</li>
+</ul>
+<p>如果能够提高应用的性能，适当的冗余是必要的。</p>
+<h1 id="结尾"><a href="#结尾" class="headerlink" title="结尾"></a>结尾</h1><p>本文总结了设计数据库时需遵守的几个原则</p>
+<ul>
+<li>可用性</li>
+<li>适当超前</li>
+<li>应对新需求</li>
+<li>分离易变与不易变部分</li>
+<li>适当冗余</li>
+</ul>
+<p>因为自知还未达到数据库专家的水准，写出的内容肯定有不准确的地方，欢迎批评指正。</p>
+<p>写这篇文章的想法酝酿很久了，但一直没时间动笔。适逢中秋佳节，上海下着大雨，不便出门行走，便安坐在电脑前敲下了这千八百字，前后花了两个多小时。如果喜欢就点赞，能指出不足或提出意见就更好了。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://limen.github.io/2016/10/07/database-design-principles/" data-id="citzf5e3z0000vss8leff3h2j" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/数据库/">数据库</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-refactor-decouple" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/10/07/refactor-decouple/" class="article-date">
+  <time datetime="2016-10-07T06:43:18.350Z" itemprop="datePublished">10/07 2016</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>最近在对业务代码进行重构，遇到了一些比较典型的“散发着难闻味道”的代码，可以用又臭又长来形容。</p>
+<p>这部分的业务是发布动态，包括以下步骤：</p>
+<ul>
+<li>敏感词过滤</li>
+<li>话题提取</li>
+<li>动态数据入库</li>
+<li>敏感词记录</li>
+<li>话题及话题动态关联关系入库</li>
+</ul>
+<p>之所以说重构前的代码“又臭又长”，首先最直观的一点，方法的行数超过了200行，其次上面四个步骤的逻辑全都写在了一起，没有按功能模块拆分，这也是方法过长的原因。</p>
+<p>如果按功能划分，发布动态包含三个模块：</p>
+<ul>
+<li>敏感词模块</li>
+<li>动态模块</li>
+<li>话题模块</li>
+</ul>
+<p>其中的<strong>敏感词模块</strong>和<strong>话题模块</strong>都是为<strong>动态模块</strong>服务的。一个动态可以有敏感词，也可以没有敏感词，比如用户分享一个链接，这就不需要做敏感词过滤与记录了，所以敏感词模块与动态模块应该是“<strong>松耦合</strong>”的。同样，一个动态可以包含话题，也可能不包含，所以话题模块与动态模块也应该是松耦合的。</p>
+<p>既然敏感词模块与话题模块都是为动态模块服务的，动态模块就有必要与这两个服务模块建立一个<strong>服务约定</strong>：</p>
+<ul>
+<li>我需要什么样的服务</li>
+<li>我们之间如何建立耦合关系</li>
+</ul>
+<h2 id="我需要什么样的服务"><a href="#我需要什么样的服务" class="headerlink" title="我需要什么样的服务"></a>我需要什么样的服务</h2><p>在编程的世界里，约定可以抽象成接口<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">interface</span> <span class="title">PublishContract</span></span></div><div class="line">&#123;</div><div class="line">    <span class="comment">// Call this method before publishing</span></div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">beforePublish</span><span class="params">()</span></span>;</div><div class="line">    </div><div class="line">    <span class="comment">// Call this method after publishing</span></div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">afterPublish</span><span class="params">()</span></span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>对于敏感词模块和话题模块，只需要实现该接口，动态模块就可以根据约定调用它们提供的服务。</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">SensitiveWords</span> <span class="keyword">implements</span> <span class="title">PublishContract</span></span></div><div class="line">&#123;</div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">beforePublish</span><span class="params">()</span></span></div><div class="line">    &#123;</div><div class="line">        <span class="comment">// </span></div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">afterPublish</span><span class="params">()</span></span></div><div class="line">    &#123;</div><div class="line">        <span class="comment">//</span></div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">TopicObserver</span> <span class="keyword">implements</span> <span class="title">PublishContract</span></span></div><div class="line">&#123;</div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">beforePublish</span><span class="params">()</span></span></div><div class="line">    &#123;</div><div class="line">        <span class="comment">// </span></div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">afterPublish</span><span class="params">()</span></span></div><div class="line">    &#123;</div><div class="line">        <span class="comment">//</span></div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>这样动态模块就知道，在动态入库前调用服务模块的beforePublish服务，入库后调用服务模块的afterPublish服务。</p>
+<h2 id="我们如何建立耦合"><a href="#我们如何建立耦合" class="headerlink" title="我们如何建立耦合"></a>我们如何建立耦合</h2><p>耦合关系的建立应该由动态发布的调用方决定，动态模块需提供相应的接口，<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Feeds</span></span></div><div class="line">&#123;</div><div class="line">    <span class="comment">// PublishContract[]</span></div><div class="line">    <span class="keyword">protected</span> $serviceModules = [];</div><div class="line">    </div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">addServiceModule</span><span class="params">(PublishContract $service)</span></span></div><div class="line">    &#123;</div><div class="line">        <span class="keyword">$this</span>-&gt;serviceModules[get_class($service)] = $service;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">removeServiceModule</span><span class="params">($serviceClassName)</span></span></div><div class="line">    &#123;</div><div class="line">        <span class="keyword">unset</span>(<span class="keyword">$this</span>-&gt;serviceModules[$serviceClassName]);</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">publish</span><span class="params">()</span></span></div><div class="line">    &#123;</div><div class="line">        <span class="keyword">foreach</span> (<span class="keyword">$this</span>-&gt;serviceModules <span class="keyword">as</span> $service) &#123;</div><div class="line">            $service-&gt;beforePublish();</div><div class="line">        &#125;</div><div class="line">        </div><div class="line">        <span class="comment">// do something about publishment</span></div><div class="line">        </div><div class="line">        <span class="keyword">foreach</span> (<span class="keyword">$this</span>-&gt;serviceModules <span class="keyword">as</span> $service) &#123;</div><div class="line">            $service-&gt;afterPublish();</div><div class="line">        &#125;</div><div class="line">    </div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>这样，动态发布的调用方可以通过addServiceModule/removeServiceModule动态地添加/删除服务模块。</p>
+<h2 id="UML图"><a href="#UML图" class="headerlink" title="UML图"></a>UML图</h2><p><img src="http://upload-images.jianshu.io/upload_images/920803-890e52a28616f911?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="[from processon.com](https://www.processon.com/i/5429053c0cf2e6eabf125bb8 &quot;&quot;)"></p>
+<h2 id="重构带来的好处"><a href="#重构带来的好处" class="headerlink" title="重构带来的好处"></a>重构带来的好处</h2><h3 id="松耦合"><a href="#松耦合" class="headerlink" title="松耦合"></a>松耦合</h3><p>服务模块与核心模块是独立的，通过接口建立松耦合的关系；可动态添加/删除服务模块。</p>
+<h3 id="易于维护"><a href="#易于维护" class="headerlink" title="易于维护"></a>易于维护</h3><p>服务模块的修改不会直接影响核心模块。</p>
+<h3 id="易于扩展"><a href="#易于扩展" class="headerlink" title="易于扩展"></a>易于扩展</h3><p>如果需要添加其它服务模块，只需实现服务约定的接口，并将新的服务模块动态添加到核心模块即可。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://limen.github.io/2016/10/07/refactor-decouple/" data-id="citzf5e5l0008vss859gmtgba" class="article-share-link">Share</a>
       
       
     </footer>
@@ -107,9 +486,23 @@
 
   
     
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/快速排序/">快速排序</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据库/">数据库</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/缓存/">缓存</a></li></ul>
+    </div>
+  </div>
+
 
   
     
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/快速排序/" style="font-size: 10px;">快速排序</a> <a href="/tags/数据库/" style="font-size: 20px;">数据库</a> <a href="/tags/算法/" style="font-size: 10px;">算法</a> <a href="/tags/缓存/" style="font-size: 10px;">缓存</a>
+    </div>
+  </div>
+
   
     
   <div class="widget-wrap">
@@ -128,7 +521,23 @@
       <ul>
         
           <li>
-            <a href="/2016/10/01/hello-world/">Hello World</a>
+            <a href="/2016/10/07/red-envelope-assignment-algorithm/">一种红包分配算法及其实现</a>
+          </li>
+        
+          <li>
+            <a href="/2016/10/07/quick-sort-and-its-testing/">快速排序算法及其测试算法的原理与实现</a>
+          </li>
+        
+          <li>
+            <a href="/2016/10/07/mongodb-or-mysql/">MongoDB还是MySQL？</a>
+          </li>
+        
+          <li>
+            <a href="/2016/10/07/database-outernal-cache-and-read-speed-improvement/">为数据库添加外部缓存带来的性能提升分析</a>
+          </li>
+        
+          <li>
+            <a href="/2016/10/07/database-design-principles/">数据库设计的重要性与几个原则</a>
           </li>
         
       </ul>
