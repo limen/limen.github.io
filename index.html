@@ -61,6 +61,124 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-fileflake-distributed-file-server-for-laravel" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/11/22/fileflake-distributed-file-server-for-laravel/" class="article-date">
+  <time datetime="2016-11-22T09:34:35.461Z" itemprop="datePublished">11/22 2016</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="Fileflake"><a href="#Fileflake" class="headerlink" title="Fileflake"></a>Fileflake</h1><p>为Laravel定制的分布式文件存储服务，使用mongodb作为后端存储引擎。</p>
+<h2 id="特性"><a href="#特性" class="headerlink" title="特性"></a>特性</h2><ul>
+<li>支持的操作：上传，下载，删除</li>
+<li>分布式的文件存储节点</li>
+<li>存储节点负载均衡</li>
+<li>易于横向扩展（添加存储节点）</li>
+<li>文件流存储于mongodb</li>
+<li>文件流分块存储，块大小可配置</li>
+<li>拥有同样签名的文件只存储一个拷贝</li>
+</ul>
+<h2 id="上手"><a href="#上手" class="headerlink" title="上手"></a>上手</h2><h3 id="安装"><a href="#安装" class="headerlink" title="安装"></a>安装</h3><p>推荐使用composer安装. 参考 <a href="https://getcomposer.org/" target="_blank" rel="external">php composer</a>.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">composer require &quot;limen/fileflake:dev-master&quot;</div></pre></td></tr></table></figure></p>
+<h3 id="使用"><a href="#使用" class="headerlink" title="使用"></a>使用</h3><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">use</span> <span class="title">Limen</span>\<span class="title">Fileflake</span>\<span class="title">Config</span>;</div><div class="line"><span class="keyword">use</span> <span class="title">Limen</span>\<span class="title">Fileflake</span>\<span class="title">Fileflake</span>;</div><div class="line"><span class="keyword">use</span> <span class="title">Limen</span>\<span class="title">Fileflake</span>\<span class="title">Protocols</span>\<span class="title">OutputFile</span>;</div><div class="line"></div><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">FileController</span></span></div><div class="line">&#123;</div><div class="line">    <span class="keyword">protected</span> $config = [</div><div class="line">        Config::KEY_FILE_META_CONNECTION =&gt; <span class="string">'mongodb_fileflake'</span>,    <span class="comment">// file meta connection</span></div><div class="line">        Config::KEY_FILE_META_COLLECTION =&gt; <span class="string">'FileMeta'</span>,             <span class="comment">// file meta collection</span></div><div class="line">        Config::KEY_NODE_META_CONNECTION =&gt; <span class="string">'mongodb_fileflake'</span>,    <span class="comment">// node meta connection</span></div><div class="line">        Config::KEY_NODE_META_COLLECTION =&gt; <span class="string">'NodeMeta'</span>,             <span class="comment">// node meta collection</span></div><div class="line"></div><div class="line">        Config::KEY_FILE_CHUNK_SIZE =&gt; <span class="number">4194304</span>,                     <span class="comment">// chunk size on byte</span></div><div class="line"></div><div class="line">        <span class="comment">// if set to true, the load balance would consider file count and file volume of each storage node,</span></div><div class="line">        <span class="comment">// or the load balance would pick one node randomly</span></div><div class="line">        Config::KEY_LOAD_BALANCE_STRICT =&gt; <span class="keyword">false</span>,</div><div class="line"></div><div class="line">        Config::KEY_STORAGE_NODES =&gt; [</div><div class="line">            [</div><div class="line">                <span class="string">'id'</span>         =&gt; <span class="number">1</span>,                          <span class="comment">// storage node id, should be unique and unmodifiable</span></div><div class="line">                <span class="string">'connection'</span> =&gt; <span class="string">'mongodb_fileflake'</span>,        <span class="comment">// storage node connection</span></div><div class="line">                <span class="string">'collection'</span> =&gt; <span class="string">'FileStore1'</span>,               <span class="comment">// storage node collection</span></div><div class="line">            ],</div><div class="line">            [</div><div class="line">                <span class="string">'id'</span>         =&gt; <span class="number">2</span>,</div><div class="line">                <span class="string">'connection'</span> =&gt; <span class="string">'mongodb_fileflake'</span>,</div><div class="line">                <span class="string">'collection'</span> =&gt; <span class="string">'FileStore2'</span>,</div><div class="line">            ],</div><div class="line">        ],</div><div class="line"></div><div class="line">        Config::KEY_LOCALIZE_DIR     =&gt; <span class="string">'/home/www/tmp/fileflake/local'</span>,    <span class="comment">// the temp local files stored in this directory</span></div><div class="line">        Config::KEY_LOCKER_FILES_DIR =&gt; <span class="string">'/home/www/tmp/fileflake/locker'</span>,   <span class="comment">// the locker files stored in this directory</span></div><div class="line">    ];</div><div class="line"></div><div class="line"></div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">upload</span><span class="params">()</span></span></div><div class="line">    &#123;</div><div class="line">        $fileflake = <span class="keyword">new</span> Fileflake(<span class="keyword">$this</span>-&gt;config);</div><div class="line"></div><div class="line">        <span class="comment">// file id is a string of 32 characters</span></div><div class="line">        $fildId = $fileflake-&gt;put(</div><div class="line">            <span class="string">'/tmp/abc'</span>,             <span class="comment">// file local path</span></div><div class="line">            <span class="string">'tulips.jpg'</span>,           <span class="comment">// file name</span></div><div class="line">            <span class="string">'879394'</span>,               <span class="comment">// file size on byte</span></div><div class="line">            <span class="string">'jpg'</span>,                  <span class="comment">// file extension</span></div><div class="line">            <span class="string">'mime/jpeg'</span>             <span class="comment">// file mime</span></div><div class="line">        );</div><div class="line">    &#125;</div><div class="line"></div><div class="line"></div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">download</span><span class="params">()</span></span></div><div class="line">    &#123;</div><div class="line">        $fileflake = <span class="keyword">new</span> Fileflake(<span class="keyword">$this</span>-&gt;config);</div><div class="line"></div><div class="line">        <span class="comment">/** <span class="doctag">@var</span> OutputFile $file */</span></div><div class="line">        $file = $fileflake-&gt;get(<span class="string">'5031a3057c8cff6fde3a4118187798bb'</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line"></div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">remove</span><span class="params">()</span></span></div><div class="line">    &#123;</div><div class="line">        $fileflake = <span class="keyword">new</span> Fileflake(<span class="keyword">$this</span>-&gt;config);</div><div class="line"></div><div class="line">        $fileflake-&gt;remove(<span class="string">'5031a3057c8cff6fde3a4118187798bb'</span>);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h3 id="存储架构"><a href="#存储架构" class="headerlink" title="存储架构"></a>存储架构</h3><h4 id="文件元数据"><a href="#文件元数据" class="headerlink" title="文件元数据"></a>文件元数据</h4><p>每个文件都有一个元数据。</p>
+<p>元数据的“引用”类似于Linux文件系统的软链接。</p>
+<p>“引用计数”表示目前有多个文件指向当前文件（源文件）。</p>
+<p>拥有相同签名的多个文件只存储一个拷贝，它们通过“引用”值与源文件产生关联。</p>
+<p>当删除一个软链接文件时，删除文件元数据，软链接文件指向的源文件的引用计数减1。<br>当删除一个源文件时，源文件的引用计数减1。<br>当一个文件的引用计数为0时，删除该文件的元数据，并将该文件从后端存储中删除。</p>
+<ul>
+<li>文件id</li>
+<li>文件名</li>
+<li>文件签名</li>
+<li>引用计数</li>
+<li>引用（源文件id）</li>
+<li>存储节点id</li>
+<li>分块id</li>
+<li>扩展名</li>
+<li>mime</li>
+</ul>
+<h4 id="存储节点"><a href="#存储节点" class="headerlink" title="存储节点"></a>存储节点</h4><ul>
+<li>分块id</li>
+<li>分块内容</li>
+</ul>
+<h4 id="节点元数据"><a href="#节点元数据" class="headerlink" title="节点元数据"></a>节点元数据</h4><p>存放存储节点元数据，用于负载均衡</p>
+<ul>
+<li>文件数量</li>
+<li>文件占用空间</li>
+</ul>
+<h1 id="github仓库"><a href="#github仓库" class="headerlink" title="github仓库"></a>github仓库</h1><p><a href="https://github.com/limen/fileflake" target="_blank" rel="external">fileflake</a>，欢迎star</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://limen.github.io/2016/11/22/fileflake-distributed-file-server-for-laravel/" data-id="civtb5vzh0003vis8hawn209a" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
+    <article id="post-red-envelope-tech-detail" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/11/22/red-envelope-tech-detail/" class="article-date">
+  <time datetime="2016-11-21T16:00:00.000Z" itemprop="datePublished">11/22 2016</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/11/22/red-envelope-tech-detail/">抢红包背后的技术要点</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>最近做了一个抢红包的项目，这个项目涉及到了后端开发的多个技术点</p>
+<ul>
+<li>应用层悲观锁</li>
+<li>数据库锁机制</li>
+<li>数据库事务</li>
+<li>数据库索引</li>
+</ul>
+<p>以上这些技术点都是为高并发场景服务的。</p>
+<h3 id="应用层悲观锁"><a href="#应用层悲观锁" class="headerlink" title="应用层悲观锁"></a>应用层悲观锁</h3><p>为了使抢红包的请求能够依次处理，使用悲观锁将红包预先锁定。需要为该悲观锁设定一个最大生存时间，以确保发生不可预知的错误时，不会影响后续的用户抢红包。其余并发进入的请求将等待并争抢红包锁。一个请求处理完成，将红包解锁，下一个成功获取锁的请求将被处理。</p>
+<p>处在等待状态的请求不断争抢红包锁。需设定一个最大重试次数，超时则请求处理过程结束。</p>
+<p>实现悲观锁的方案有多种，这里采用了redis的原子操作setnx，setnx返回1代表争抢成功。</p>
+<h3 id="数据库锁机制"><a href="#数据库锁机制" class="headerlink" title="数据库锁机制"></a>数据库锁机制</h3><p>使用SELECT FOR UPDATE为数据加锁，保证同一时刻只能有一个请求更新数据。在应用层悲观锁的保护下，数据库锁争用、幻读的现象可以减少甚至避免，这样也降低了数据库本身的压力。</p>
+<h3 id="数据库事务"><a href="#数据库事务" class="headerlink" title="数据库事务"></a>数据库事务</h3><p>抢红包涉及到金钱，在发生异常时需回滚，保证数据一致性。</p>
+<h3 id="数据库索引"><a href="#数据库索引" class="headerlink" title="数据库索引"></a>数据库索引</h3><p>合理利用数据库索引可以避免不期望的结果。</p>
+<p>红包的数据库采用了MySql，分两个表，主表和抢红包记录表。每个用户被限定最多只能抢一次红包，抢红包记录表中的唯一索引（红包id，用户id）可以避免发生意外。</p>
+<p>经过应用层悲观锁、数据库锁的保护，发生这种意外的可能性已经微乎其微了。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://limen.github.io/2016/11/22/red-envelope-tech-detail/" data-id="civtb5w0a000avis8xut42259" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/并发/">并发</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/悲观锁/">悲观锁</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/数据库/">数据库</a></li></ul>
+
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-red-envelope-assignment-algorithm" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/09/29/red-envelope-assignment-algorithm/" class="article-date">
@@ -104,7 +222,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://limen.github.io/2016/09/29/red-envelope-assignment-algorithm/" data-id="citzff73j0005yzs8favgwedn" class="article-share-link">Share</a>
+      <a data-url="http://limen.github.io/2016/09/29/red-envelope-assignment-algorithm/" data-id="civtb5w040008vis8bgg8twdh" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/算法/">算法</a></li></ul>
@@ -172,7 +290,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://limen.github.io/2016/09/27/quick-sort-and-its-testing/" data-id="citzff7360004yzs8dcxrza3b" class="article-share-link">Share</a>
+      <a data-url="http://limen.github.io/2016/09/27/quick-sort-and-its-testing/" data-id="civtb5vzy0005vis8xc2iiwnr" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/算法/">算法</a></li></ul>
@@ -206,38 +324,22 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h1 id="应用场景"><a href="#应用场景" class="headerlink" title="应用场景"></a>应用场景</h1><p>用户发布一条动态，动态中可以包含由“##”包裹的话题内容。</p>
-<p>一条动态可以包含多个话题，一个话题可以关联多个动态。</p>
-<h1 id="数据结构"><a href="#数据结构" class="headerlink" title="数据结构"></a>数据结构</h1><p><strong>话题表</strong></p>
-<ul>
-<li>话题id</li>
-<li>话题内容</li>
-<li>创建话题的用户id</li>
-</ul>
-<p><strong>动态话题关联表</strong></p>
-<ul>
-<li>话题id</li>
-<li>动态id</li>
-</ul>
-<p>DBA看到创建数据表的邮件后发问，为什么用MySQL，而不用MongoDB？</p>
-<p><strong>他的理由</strong></p>
-<ul>
-<li>MongoDB在文档数达到上亿时仍能保持良好性能，MySQL没有这么强大</li>
-</ul>
-<p><strong>我为什么采用MySQL？</strong></p>
-<ul>
-<li>两张表的schema是比较固定的</li>
-<li>两张表通过话题id构成关联关系，MySQL支持关联查询，MongoDB不支持</li>
-<li>MySQL按照表的schema对写操作进行约束，MongoDB相反，因为MongoDB的特点就是schemaless</li>
-</ul>
-<h1 id="关于数据量的问题"><a href="#关于数据量的问题" class="headerlink" title="关于数据量的问题"></a>关于数据量的问题</h1><p>在我的另一篇文章<a href="http://www.jianshu.com/p/4cdb59716483" target="_blank" rel="external">数据库设计的重要性与原则</a>，根据其中的<strong>适度超前</strong>原则，从目前的每日动态发布量来看，这两张表的数据量在5年内不会达到上亿。</p>
-<p>如果达到上亿的数据量，是否真的需要切换到MongoDB？我看没这个必要。即使是MongoDB，数据量达到一定的量之后，读写性能也会急剧下降。</p>
-<p>我们有更好的方案来解决读写性能下降的问题，但这是另外一个话题了。</p>
+        <p>MongoDB和MySql是目前最常用的两种数据库。面对一个应用场景，选择Mongodb还是MySql，哪一个更合适？</p>
+<p>弄清两者的区别，就是对这个问题最好的回答。从schema、事务支持、关联查询三个方面进行说明。</p>
+<h2 id="schema"><a href="#schema" class="headerlink" title="schema"></a>schema</h2><p>schema可以理解为约束。MySql的每个数据表都有一个schema，指明了每个字段的类型，这些类型就是对写入数据的约束。例如，一个字段为int型的字段，写入”helloworld”就会因类型不匹配而报错，导致写入失败；一个int unsigned类型的字段，写入-1同样会报错。</p>
+<p>schema除了可以约束字段类型，还可以约束索引。例如建立一个唯一索引（userid，classid），假定数据库中已经有一条（userid=100，classid=1）的记录，如果此时再尝试写入一条userid=100，classid=1的数据，就会因为违反了唯一索引的限制而导致写入失败。</p>
+<p>MongoDB作为一种schemaless的数据库，对写入的数据是没有类型限制的，这一点也是MongoDB与MySql之间最重要的一个区别。</p>
+<p>如果一个应用的数据结构比较固定，需要约束字段类型和索引，则选用MySQL是合适的，反之则应该选用MongoDB。</p>
+<h2 id="事务支持"><a href="#事务支持" class="headerlink" title="事务支持"></a>事务支持</h2><p>MySQL的InnoDB存储引擎支持事务，这使得MySQL适合那些对一致性要求较高的应用，在代码运行异常或出现业务异常时可以及时回滚。</p>
+<p>截至目前最新的3.2版本，MongoDB还不支持事务。</p>
+<p>如果一个应用场景需要更新多个表，在发生异常时需回滚数据，未发生异常时提交数据，选用MySQL是合适的。</p>
+<h2 id="关联查询"><a href="#关联查询" class="headerlink" title="关联查询"></a>关联查询</h2><p>MySQL作为一种关系型数据库，天然支持联表查询。如果一个应用的数据结构需拆分成多个表，且表之间有关联关系，应选用MySQL。</p>
+<p>Mongodb（&lt;=3.2）不支持联表查询，这意味着一个查询只能针对一个表。</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://limen.github.io/2016/09/17/mongodb-or-mysql/" data-id="citzff7310003yzs8uqa3kw8i" class="article-share-link">Share</a>
+      <a data-url="http://limen.github.io/2016/09/17/mongodb-or-mysql/" data-id="civtb5vzm0004vis84plfer6v" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/数据库/">数据库</a></li></ul>
@@ -285,7 +387,7 @@
 <p>良好的数据结构可以提升性能，使代码变得简单、清晰。数据结构清晰了，围绕着数据运行的代码自然就清晰了。</p>
 <h1 id="数据库设计需考虑的因素"><a href="#数据库设计需考虑的因素" class="headerlink" title="数据库设计需考虑的因素"></a>数据库设计需考虑的因素</h1><p>提到数据库设计原则，首先会想到第一、第二、第三范式，这些理论能了解最好，但这不是本文探讨的主题。</p>
 <p>面对一个具体的应用场景，设计数据库时应考虑哪些因素？为了能够言之有物，我们拿<a href="www.jianshu.com">简书</a>的文章页面来现身说法。</p>
-<h3 id="当前可用性"><a href="#当前可用性" class="headerlink" title="当前可用性"></a>当前可用性</h3><p>数据结构的设计要能达到应用场景的要求，这是最基本的。举个例子，这篇文章的正文存储在了数据表中的某个字段，该字段的长度被设定为1000字，这显然不能满足应用场景的要求，文章写到这里已经超过了1000字（估计的，我没有数）。</p>
+<h3 id="当前可用性"><a href="#当前可用性" class="headerlink" title="当前可用性"></a>当前可用性</h3><p>数据结构的设计要能达到应用场景的要求，这是最基本的。举个例子，这篇文章的正文存储在了数据表中的某个字段，该字段的长度被设定为1000字，这显然不能满足应用场景的要求，文章写到这里已经超过了1000字。需要考虑，什么样的字段类型才能存储长度很大的文本？</p>
 <h3 id="适当超前"><a href="#适当超前" class="headerlink" title="适当超前"></a>适当超前</h3><p>超前到什么程度需要根据对应用的预期来定。拿QQ来说，马化腾最初肯定预见不到QQ能有目前的用户量与活跃度，毕竟那是近20年前的事情了。</p>
 <p>对于本文设定的应用场景，我们把超前设定为网站的文章数量达到了千万级。这时如果只把文章存在一张数据表里，读写性能必然是会急剧下降的，这必然会导致用户体验变差，用户流失。老板不能容忍，DBA也不能容忍。</p>
 <p>合理的解决方案之一是分为两张数据表，一张存储热门文章，另一张存储非热门文章。毕竟热门文章占少数，热门文章的加载速度相对就更快了。还有别的解决方案吗？肯定有，留给您自己思考。</p>
@@ -327,13 +429,12 @@
 <li>分离易变与不易变部分</li>
 <li>适当冗余</li>
 </ul>
-<p>因为自知还未达到数据库专家的水准，写出的内容肯定有不准确的地方，欢迎批评指正。</p>
-<p>写这篇文章的想法酝酿很久了，但一直没时间动笔。适逢中秋佳节，上海下着大雨，不便出门行走，便安坐在电脑前敲下了这千八百字，前后花了两个多小时。如果喜欢就点赞，能指出不足或提出意见就更好了。</p>
+<p>认识到数据结构的重要性，才能设计出好的数据结构。</p>
 
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://limen.github.io/2016/09/15/database-design-principles/" data-id="citzff7270000yzs8wicj2tww" class="article-share-link">Share</a>
+      <a data-url="http://limen.github.io/2016/09/15/database-design-principles/" data-id="civtb5vyt0000vis89j2ou1z7" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/数据库/">数据库</a></li></ul>
@@ -404,7 +505,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://limen.github.io/2016/08/23/refactor-decouple/" data-id="citzff73r0008yzs89q9f104x" class="article-share-link">Share</a>
+      <a data-url="http://limen.github.io/2016/08/23/refactor-decouple/" data-id="civtb5w0k000cvis8u91fvacl" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/重构/">重构</a></li></ul>
@@ -476,7 +577,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://limen.github.io/2016/07/29/database-outernal-cache-and-read-speed-improvement/" data-id="citzff72m0001yzs8x5nb0rpl" class="article-share-link">Share</a>
+      <a data-url="http://limen.github.io/2016/07/29/database-outernal-cache-and-read-speed-improvement/" data-id="civtb5vz30001vis8hqjwq2mn" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/数据库/">数据库</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/缓存/">缓存</a></li></ul>
@@ -500,7 +601,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">标签</h3>
     <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据库/">数据库</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/缓存/">缓存</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/重构/">重构</a></li></ul>
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/并发/">并发</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/悲观锁/">悲观锁</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据库/">数据库</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/缓存/">缓存</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/重构/">重构</a></li></ul>
     </div>
   </div>
 
@@ -510,7 +611,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">标签云</h3>
     <div class="widget tagcloud">
-      <a href="/tags/数据库/" style="font-size: 20px;">数据库</a> <a href="/tags/算法/" style="font-size: 15px;">算法</a> <a href="/tags/缓存/" style="font-size: 10px;">缓存</a> <a href="/tags/重构/" style="font-size: 10px;">重构</a>
+      <a href="/tags/并发/" style="font-size: 10px;">并发</a> <a href="/tags/悲观锁/" style="font-size: 10px;">悲观锁</a> <a href="/tags/数据库/" style="font-size: 20px;">数据库</a> <a href="/tags/算法/" style="font-size: 15px;">算法</a> <a href="/tags/缓存/" style="font-size: 10px;">缓存</a> <a href="/tags/重构/" style="font-size: 10px;">重构</a>
     </div>
   </div>
 
@@ -519,7 +620,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">归档</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a></li></ul>
     </div>
   </div>
 
@@ -532,6 +633,14 @@
       <ul>
         
           <li>
+            <a href="/2016/11/22/fileflake-distributed-file-server-for-laravel/">(no title)</a>
+          </li>
+        
+          <li>
+            <a href="/2016/11/22/red-envelope-tech-detail/">抢红包背后的技术要点</a>
+          </li>
+        
+          <li>
             <a href="/2016/09/29/red-envelope-assignment-algorithm/">一种红包分配算法及其实现</a>
           </li>
         
@@ -541,14 +650,6 @@
         
           <li>
             <a href="/2016/09/17/mongodb-or-mysql/">MongoDB还是MySQL？</a>
-          </li>
-        
-          <li>
-            <a href="/2016/09/15/database-design-principles/">数据库设计的重要性与几个原则</a>
-          </li>
-        
-          <li>
-            <a href="/2016/08/23/refactor-decouple/">代码重构之解耦合</a>
           </li>
         
       </ul>
