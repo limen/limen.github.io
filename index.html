@@ -61,6 +61,60 @@
       <div class="outer">
         <section id="main">
   
+    <article id="post-curd-model-for-redis-in-laravel-style" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/12/09/curd-model-for-redis-in-laravel-style/" class="article-date">
+  <time datetime="2016-12-09T09:44:21.740Z" itemprop="datePublished">12/09 2016</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h1 id="CURD-model-for-redis-in-laravel-style"><a href="#CURD-model-for-redis-in-laravel-style" class="headerlink" title="CURD model for redis in laravel style"></a>CURD model for redis in laravel style</h1><h2 id="Features"><a href="#Features" class="headerlink" title="Features"></a>Features</h2><ul>
+<li>support operations: create, insert, find, destroy and so on</li>
+<li>fluent query builder</li>
+<li>use “multi” and “exec” for batch operation</li>
+</ul>
+<h2 id="Installation"><a href="#Installation" class="headerlink" title="Installation"></a>Installation</h2><p>This library could be found on <a href="https://packagist.org/packages/limen/redmodel" target="_blank" rel="external">Packagist</a> for an easier management of projects dependencies using <a href="https://getcomposer.org/" target="_blank" rel="external">Composer</a>.</p>
+<h2 id="Usage"><a href="#Usage" class="headerlink" title="Usage"></a>Usage</h2><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">use</span> <span class="title">Limen</span>\<span class="title">RedModel</span>\<span class="title">Examples</span>\<span class="title">HashModel</span>;</div><div class="line"></div><div class="line"></div><div class="line"><span class="comment">// constructing parameters are passed transparently to Predis client's constructor</span></div><div class="line">$hashModel = <span class="keyword">new</span> HashModel([</div><div class="line">    <span class="string">'scheme'</span> =&gt; <span class="string">'tcp'</span>,</div><div class="line">    <span class="string">'host'</span> =&gt; <span class="string">'127.0.0.1'</span>,</div><div class="line">    <span class="string">'port'</span> =&gt; <span class="number">6379</span>,</div><div class="line">]);</div><div class="line"></div><div class="line">$maria = [</div><div class="line">    <span class="string">'name'</span> =&gt; <span class="string">'Maria'</span>,</div><div class="line">    <span class="string">'age'</span> =&gt; <span class="string">'22'</span>,</div><div class="line">    <span class="string">'nation'</span> =&gt; <span class="string">'USA'</span>,</div><div class="line">    <span class="string">'state'</span> =&gt; <span class="string">'New York'</span>,</div><div class="line">];</div><div class="line">$cat = [</div><div class="line">    <span class="string">'name'</span> =&gt; <span class="string">'Catherine'</span>,</div><div class="line">    <span class="string">'age'</span> =&gt; <span class="string">'23'</span>,</div><div class="line">    <span class="string">'nation'</span> =&gt; <span class="string">'UK'</span>,</div><div class="line">    <span class="string">'city'</span> =&gt; <span class="string">'London'</span>,</div><div class="line">];</div><div class="line"></div><div class="line">$tested = [];</div><div class="line"></div><div class="line"><span class="comment">// insert</span></div><div class="line">$hashModel-&gt;insert([<span class="string">'id'</span> =&gt; <span class="number">1</span>], $maria);</div><div class="line">$hashModel-&gt;insert([<span class="string">'id'</span> =&gt; <span class="number">2</span>], $cat);</div><div class="line"><span class="comment">// find by primary key</span></div><div class="line">$user = $hashModel-&gt;find(<span class="number">1</span>);</div><div class="line"></div><div class="line"><span class="keyword">if</span> ($user === $maria) &#123;</div><div class="line">    $tested[] = <span class="string">'Find OK'</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// find by query</span></div><div class="line">$users = $hashModel-&gt;where(<span class="string">'id'</span>, <span class="number">1</span>)-&gt;get();</div><div class="line"><span class="keyword">if</span> ($users === [$maria]) &#123;</div><div class="line">    $tested[] = <span class="string">'Where then get OK'</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line">$user = $hashModel-&gt;where(<span class="string">'id'</span>, <span class="number">1</span>)-&gt;first();</div><div class="line"><span class="keyword">if</span> ($user === $maria) &#123;</div><div class="line">    $tested[] = <span class="string">'Where then first OK'</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line">$users = $hashModel-&gt;whereIn(<span class="string">'id'</span>, [<span class="number">1</span>,<span class="number">2</span>])-&gt;get();</div><div class="line"><span class="keyword">if</span> ($users === [$maria, $cat]) &#123;</div><div class="line">    $tested[] = <span class="string">'Where in then get OK'</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// find batch by primary keys</span></div><div class="line">$users = $hashModel-&gt;findBatch([<span class="number">1</span>,<span class="number">2</span>]);</div><div class="line"><span class="keyword">if</span> ($users === [$maria, $cat]) &#123;</div><div class="line">    $tested[] = <span class="string">'find batch OK'</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// update by query</span></div><div class="line">$hashModel-&gt;where(<span class="string">'id'</span>, <span class="number">1</span>)-&gt;update([</div><div class="line">    <span class="string">'age'</span> =&gt; <span class="string">'23'</span>,</div><div class="line">]);</div><div class="line">$user = $hashModel-&gt;find(<span class="number">1</span>);</div><div class="line"><span class="keyword">if</span> ($user[<span class="string">'age'</span>] === <span class="string">'23'</span>) &#123;</div><div class="line">    $tested[] = <span class="string">'Update OK'</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// remove item</span></div><div class="line">$hashModel-&gt;destroy(<span class="number">1</span>);</div><div class="line"></div><div class="line">$user = $hashModel-&gt;find(<span class="number">1</span>);</div><div class="line"><span class="keyword">if</span> (!$user) &#123;</div><div class="line">    $tested[] = <span class="string">'Destroy OK'</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line">var_dump($tested);</div></pre></td></tr></table></figure>
+<h2 id="Operation-notices"><a href="#Operation-notices" class="headerlink" title="Operation notices"></a>Operation notices</h2><h3 id="create"><a href="#create" class="headerlink" title="create"></a>create</h3><p>Can use when a model’s key representation has only one dynamic field.</p>
+<p>The default choice is “forced”, which would replace the same key if exists.</p>
+<h3 id="insert"><a href="#insert" class="headerlink" title="insert"></a>insert</h3><p>The default choice is “forced”, which would replace the same key if exists.</p>
+<h3 id="Redis-native-methods"><a href="#Redis-native-methods" class="headerlink" title="Redis native methods"></a>Redis native methods</h3><p>Redis native methods such as “sadd”, “hset” can use when the query builder contains only one valid query key.</p>
+<pre><code>// string model
+$model-&gt;where(&apos;id&apos;, 1)-&gt;set(&apos;maria&apos;);
+
+// hash model
+$model-&gt;where(&apos;id&apos;, 1)-&gt;update([
+    &apos;name&apos; =&gt; &apos;Maria&apos;,
+    &apos;age&apos; =&gt; &apos;22&apos;,
+]);
+// equal to
+$model-&gt;where(&apos;id&apos;, 1)-&gt;hmset([
+    &apos;name&apos; =&gt; &apos;Maria&apos;,
+    &apos;age&apos; =&gt; &apos;22&apos;,
+]);
+</code></pre><h2 id="Query-builder"><a href="#Query-builder" class="headerlink" title="Query builder"></a>Query builder</h2><p>Taking the job to build query keys for model.</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// model's key representation user:&#123;id&#125;:&#123;name&#125;</span></div><div class="line">$queryBuilder-&gt;whereIn(<span class="string">'id'</span>, [<span class="number">1</span>,<span class="number">2</span>])-&gt;where(<span class="string">'name'</span>, <span class="string">'maria'</span>);</div><div class="line"><span class="comment">// built keys</span></div><div class="line"><span class="comment">// user:1:maria</span></div><div class="line"><span class="comment">// user:2:maria</span></div></pre></td></tr></table></figure>
+<p>The built query keys which contain unbound fields would be ignored. For example</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">user:1:&#123;name&#125;</div></pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://limen.github.io/2016/12/09/curd-model-for-redis-in-laravel-style/" data-id="ciwhlyvly0000rbs8gevvfgzv" class="article-share-link">Share</a>
+      
+      
+    </footer>
+  </div>
+  
+</article>
+
+
+  
     <article id="post-fileflake-distributed-file-server-for-laravel" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-meta">
     <a href="/2016/11/22/fileflake-distributed-file-server-for-laravel/" class="article-date">
@@ -125,7 +179,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://limen.github.io/2016/11/22/fileflake-distributed-file-server-for-laravel/" data-id="civtbgcs40003xos8d4qwvc7f" class="article-share-link">Share</a>
+      <a data-url="http://limen.github.io/2016/11/22/fileflake-distributed-file-server-for-laravel/" data-id="ciwhlyvmf0002rbs8jb9nr941" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/laravel/">laravel</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/文件存储/">文件存储</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/架构/">架构</a></li></ul>
@@ -179,7 +233,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://limen.github.io/2016/11/22/red-envelope-tech-detail/" data-id="civtbgcst000axos89l8t4okk" class="article-share-link">Share</a>
+      <a data-url="http://limen.github.io/2016/11/22/red-envelope-tech-detail/" data-id="ciwhlyvo5000arbs8or7de2rw" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/并发/">并发</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/悲观锁/">悲观锁</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/数据库/">数据库</a></li></ul>
@@ -234,7 +288,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://limen.github.io/2016/09/29/red-envelope-assignment-algorithm/" data-id="civtbgcsn0008xos8isms5jm5" class="article-share-link">Share</a>
+      <a data-url="http://limen.github.io/2016/09/29/red-envelope-assignment-algorithm/" data-id="ciwhlyvo10009rbs8tov11y1z" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/算法/">算法</a></li></ul>
@@ -302,7 +356,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://limen.github.io/2016/09/27/quick-sort-and-its-testing/" data-id="civtbgcsi0005xos87kg4a1w5" class="article-share-link">Share</a>
+      <a data-url="http://limen.github.io/2016/09/27/quick-sort-and-its-testing/" data-id="ciwhlyvnp0006rbs8ymlenwlg" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/算法/">算法</a></li></ul>
@@ -351,7 +405,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://limen.github.io/2016/09/17/mongodb-or-mysql/" data-id="civtbgcs80004xos8qotj0ux1" class="article-share-link">Share</a>
+      <a data-url="http://limen.github.io/2016/09/17/mongodb-or-mysql/" data-id="ciwhlyvng0004rbs8u6xzqbs8" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/数据库/">数据库</a></li></ul>
@@ -446,7 +500,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://limen.github.io/2016/09/15/database-design-principles/" data-id="civtbgcre0000xos82lqh5kmd" class="article-share-link">Share</a>
+      <a data-url="http://limen.github.io/2016/09/15/database-design-principles/" data-id="ciwhlyvm80001rbs81i3zu2ur" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/数据库/">数据库</a></li></ul>
@@ -517,7 +571,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://limen.github.io/2016/08/23/refactor-decouple/" data-id="civtbgct2000cxos8k132ktjy" class="article-share-link">Share</a>
+      <a data-url="http://limen.github.io/2016/08/23/refactor-decouple/" data-id="ciwhlyvo9000crbs84sn9vm2q" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/重构/">重构</a></li></ul>
@@ -589,7 +643,7 @@
       
     </div>
     <footer class="article-footer">
-      <a data-url="http://limen.github.io/2016/07/29/database-outernal-cache-and-read-speed-improvement/" data-id="civtbgcrr0001xos8snyxozoe" class="article-share-link">Share</a>
+      <a data-url="http://limen.github.io/2016/07/29/database-outernal-cache-and-read-speed-improvement/" data-id="ciwhlyvnj0005rbs8pox1nei9" class="article-share-link">Share</a>
       
       
   <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/数据库/">数据库</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/缓存/">缓存</a></li></ul>
@@ -632,7 +686,7 @@
   <div class="widget-wrap">
     <h3 class="widget-title">归档</h3>
     <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a></li></ul>
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a></li></ul>
     </div>
   </div>
 
@@ -643,6 +697,10 @@
     <h3 class="widget-title">最新文章</h3>
     <div class="widget">
       <ul>
+        
+          <li>
+            <a href="/2016/12/09/curd-model-for-redis-in-laravel-style/">(no title)</a>
+          </li>
         
           <li>
             <a href="/2016/11/22/fileflake-distributed-file-server-for-laravel/">fileflake:适用于laravel框架的分布式文件存储服务</a>
@@ -658,10 +716,6 @@
         
           <li>
             <a href="/2016/09/27/quick-sort-and-its-testing/">快速排序算法及其测试算法的原理与实现</a>
-          </li>
-        
-          <li>
-            <a href="/2016/09/17/mongodb-or-mysql/">MongoDB还是MySQL？</a>
           </li>
         
       </ul>
