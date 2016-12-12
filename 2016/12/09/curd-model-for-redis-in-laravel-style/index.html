@@ -1,35 +1,258 @@
-extends partial/base
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>CURD model for Redis in Laravel style | Mengxiang&#39;s blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="Features
+Supported operations: create, insert, find, destroy and so on
+Fluent query builder
+Use “multi” and “exec” for batch operation
 
-include partial/post-meta
+InstallationThis library could be found on Packagist for an easi">
+<meta property="og:type" content="article">
+<meta property="og:title" content="CURD model for Redis in Laravel style">
+<meta property="og:url" content="http://limen.github.io/2016/12/09/curd-model-for-redis-in-laravel-style/index.html">
+<meta property="og:site_name" content="Mengxiang's blog">
+<meta property="og:description" content="Features
+Supported operations: create, insert, find, destroy and so on
+Fluent query builder
+Use “multi” and “exec” for batch operation
+
+InstallationThis library could be found on Packagist for an easi">
+<meta property="og:updated_time" content="2016-12-12T06:38:46.604Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="CURD model for Redis in Laravel style">
+<meta name="twitter:description" content="Features
+Supported operations: create, insert, find, destroy and so on
+Fluent query builder
+Use “multi” and “exec” for batch operation
+
+InstallationThis library could be found on Packagist for an easi">
+  
+    <link rel="alternate" href="/atom.xml" title="Mengxiang&#39;s blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Mengxiang&#39;s blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://limen.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-curd-model-for-redis-in-laravel-style" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/12/09/curd-model-for-redis-in-laravel-style/" class="article-date">
+  <time datetime="2016-12-08T16:00:00.000Z" itemprop="datePublished">12/09 2016</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      CURD model for Redis in Laravel style
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h2 id="Features"><a href="#Features" class="headerlink" title="Features"></a>Features</h2><ul>
+<li>Supported operations: create, insert, find, destroy and so on</li>
+<li>Fluent query builder</li>
+<li>Use “multi” and “exec” for batch operation</li>
+</ul>
+<h2 id="Installation"><a href="#Installation" class="headerlink" title="Installation"></a>Installation</h2><p>This library could be found on <a href="https://packagist.org/packages/limen/redmodel" target="_blank" rel="external">Packagist</a> for an easier management of projects dependencies using <a href="https://getcomposer.org/" target="_blank" rel="external">Composer</a>.</p>
+<p>Github repo: <a href="https://github.com/limen/redmodel" target="_blank" rel="external">redmodel</a></p>
+<h2 id="Usage"><a href="#Usage" class="headerlink" title="Usage"></a>Usage</h2><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">use</span> <span class="title">Limen</span>\<span class="title">RedModel</span>\<span class="title">Examples</span>\<span class="title">HashModel</span>;</div><div class="line"></div><div class="line"><span class="comment">// constructing parameters are passed transparently to Predis client's constructor</span></div><div class="line">$hashModel = <span class="keyword">new</span> HashModel([</div><div class="line">    <span class="string">'scheme'</span> =&gt; <span class="string">'tcp'</span>,</div><div class="line">    <span class="string">'host'</span> =&gt; <span class="string">'127.0.0.1'</span>,</div><div class="line">    <span class="string">'port'</span> =&gt; <span class="number">6379</span>,</div><div class="line">]);</div><div class="line"></div><div class="line">$maria = [</div><div class="line">    <span class="string">'name'</span> =&gt; <span class="string">'Maria'</span>,</div><div class="line">    <span class="string">'age'</span> =&gt; <span class="string">'22'</span>,</div><div class="line">    <span class="string">'nation'</span> =&gt; <span class="string">'USA'</span>,</div><div class="line">    <span class="string">'state'</span> =&gt; <span class="string">'New York'</span>,</div><div class="line">];</div><div class="line">$cat = [</div><div class="line">    <span class="string">'name'</span> =&gt; <span class="string">'Catherine'</span>,</div><div class="line">    <span class="string">'age'</span> =&gt; <span class="string">'23'</span>,</div><div class="line">    <span class="string">'nation'</span> =&gt; <span class="string">'UK'</span>,</div><div class="line">    <span class="string">'city'</span> =&gt; <span class="string">'London'</span>,</div><div class="line">];</div><div class="line"></div><div class="line">$tested = [];</div><div class="line"></div><div class="line"><span class="comment">// insert</span></div><div class="line">$hashModel-&gt;insert([<span class="string">'id'</span> =&gt; <span class="number">1</span>], $maria);</div><div class="line">$hashModel-&gt;insert([<span class="string">'id'</span> =&gt; <span class="number">2</span>], $cat);</div><div class="line"><span class="comment">// find by primary key</span></div><div class="line">$user = $hashModel-&gt;find(<span class="number">1</span>);</div><div class="line"></div><div class="line"><span class="keyword">if</span> ($user === $maria) &#123;</div><div class="line">    $tested[] = <span class="string">'Find OK'</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// find by query</span></div><div class="line">$users = $hashModel-&gt;where(<span class="string">'id'</span>, <span class="number">1</span>)-&gt;get();</div><div class="line"><span class="keyword">if</span> ($users === [$maria]) &#123;</div><div class="line">    $tested[] = <span class="string">'Where then get OK'</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line">$user = $hashModel-&gt;where(<span class="string">'id'</span>, <span class="number">1</span>)-&gt;first();</div><div class="line"><span class="keyword">if</span> ($user === $maria) &#123;</div><div class="line">    $tested[] = <span class="string">'Where then first OK'</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line">$users = $hashModel-&gt;whereIn(<span class="string">'id'</span>, [<span class="number">1</span>,<span class="number">2</span>])-&gt;get();</div><div class="line"><span class="keyword">if</span> ($users === [$maria, $cat]) &#123;</div><div class="line">    $tested[] = <span class="string">'Where in then get OK'</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// find batch by primary keys</span></div><div class="line">$users = $hashModel-&gt;findBatch([<span class="number">1</span>,<span class="number">2</span>]);</div><div class="line"><span class="keyword">if</span> ($users === [$maria, $cat]) &#123;</div><div class="line">    $tested[] = <span class="string">'find batch OK'</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// update by query</span></div><div class="line">$hashModel-&gt;where(<span class="string">'id'</span>, <span class="number">1</span>)-&gt;update([</div><div class="line">    <span class="string">'age'</span> =&gt; <span class="string">'23'</span>,</div><div class="line">]);</div><div class="line">$user = $hashModel-&gt;find(<span class="number">1</span>);</div><div class="line"><span class="keyword">if</span> ($user[<span class="string">'age'</span>] === <span class="string">'23'</span>) &#123;</div><div class="line">    $tested[] = <span class="string">'Update OK'</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="comment">// remove item</span></div><div class="line">$hashModel-&gt;destroy(<span class="number">1</span>);</div><div class="line"></div><div class="line">$user = $hashModel-&gt;find(<span class="number">1</span>);</div><div class="line"><span class="keyword">if</span> (!$user) &#123;</div><div class="line">    $tested[] = <span class="string">'Destroy OK'</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line">var_dump($tested);</div></pre></td></tr></table></figure>
+<h2 id="Operation-notices"><a href="#Operation-notices" class="headerlink" title="Operation notices"></a>Operation notices</h2><h3 id="create"><a href="#create" class="headerlink" title="create"></a>create</h3><p>Can use when a model’s key representation has only one dynamic field.</p>
+<p>The default choice is “forced”, which would replace the same key if exists.</p>
+<h3 id="insert"><a href="#insert" class="headerlink" title="insert"></a>insert</h3><p>The default choice is “forced”, which would replace the same key if exists.</p>
+<h3 id="Redis-native-methods"><a href="#Redis-native-methods" class="headerlink" title="Redis native methods"></a>Redis native methods</h3><p>Redis native methods such as “set”, “hmset” can use when the query builder contains only one valid query key.</p>
+<pre><code>// string model
+$model-&gt;where(&apos;id&apos;, 1)-&gt;set(&apos;maria&apos;);
+
+// hash model
+$model-&gt;where(&apos;id&apos;, 1)-&gt;update([
+    &apos;name&apos; =&gt; &apos;Maria&apos;,
+    &apos;age&apos; =&gt; &apos;22&apos;,
+]);
+// equal to
+$model-&gt;where(&apos;id&apos;, 1)-&gt;hmset([
+    &apos;name&apos; =&gt; &apos;Maria&apos;,
+    &apos;age&apos; =&gt; &apos;22&apos;,
+]);
+</code></pre><h2 id="Query-builder"><a href="#Query-builder" class="headerlink" title="Query builder"></a>Query builder</h2><p>Taking the job to build query keys for model.</p>
+<figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="comment">// model's key representation user:&#123;id&#125;:&#123;name&#125;</span></div><div class="line">$queryBuilder-&gt;whereIn(<span class="string">'id'</span>, [<span class="number">1</span>,<span class="number">2</span>])-&gt;where(<span class="string">'name'</span>, <span class="string">'maria'</span>);</div><div class="line"><span class="comment">// built keys</span></div><div class="line"><span class="comment">// user:1:maria</span></div><div class="line"><span class="comment">// user:2:maria</span></div></pre></td></tr></table></figure>
+<p>The built query keys which contain unbound fields would be ignored. For example</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">user:1:&#123;name&#125;</div></pre></td></tr></table></figure>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://limen.github.io/2016/12/09/curd-model-for-redis-in-laravel-style/" data-id="ciwlqbckj0000hxs8kkf4mpof" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/laravel/">laravel</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/">redis</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/开源/">开源</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+  
+    <a href="/2016/11/22/fileflake-distributed-file-server-for-laravel/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">fileflake:适用于laravel框架的分布式文件存储服务</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/laravel/">laravel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/并发/">并发</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/开源/">开源</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/悲观锁/">悲观锁</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据库/">数据库</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/文件存储/">文件存储</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/架构/">架构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/缓存/">缓存</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/重构/">重构</a></li></ul>
+    </div>
+  </div>
 
 
-block header
-    header.header-section
-        .intro-header.no-img
-            .container
-                .row
-                    .col-lg-8.col-lg-offset-2.col-md-10.col-md-offset-1
-                        .post-heading
-                            h1= page.title
-                            if page.subtitle
-                                h2.post-subheading= page.subtitle
-                            +post_meta(page.date, page.tags)
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/laravel/" style="font-size: 15px;">laravel</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/并发/" style="font-size: 10px;">并发</a> <a href="/tags/开源/" style="font-size: 15px;">开源</a> <a href="/tags/悲观锁/" style="font-size: 10px;">悲观锁</a> <a href="/tags/数据库/" style="font-size: 20px;">数据库</a> <a href="/tags/文件存储/" style="font-size: 10px;">文件存储</a> <a href="/tags/架构/" style="font-size: 10px;">架构</a> <a href="/tags/算法/" style="font-size: 15px;">算法</a> <a href="/tags/缓存/" style="font-size: 10px;">缓存</a> <a href="/tags/重构/" style="font-size: 10px;">重构</a>
+    </div>
+  </div>
 
-block content
-    .container
-        .row
-            .col-lg-8.col-lg-offset-2.col-md-10.col-md-offset-1
-                article(role="main", class="blog-post")
-                    != page.content
-                ul.pager.blog-pager
-                    if page.prev
-                        li.previous
-                            a(href=url_for(page.prev.path), data-toggle="tooltip", data-placement="top", title=page.prev.title)= __('prev_post')
-                    if page.next
-                        li.next
-                            a(href=url_for(page.next.path), data-toggle="tooltip", data-placement="top", title=page.next.title)= __('next_post')
-
-                include partial/comment
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a></li></ul>
+    </div>
+  </div>
 
 
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/12/09/curd-model-for-redis-in-laravel-style/">CURD model for Redis in Laravel style</a>
+          </li>
+        
+          <li>
+            <a href="/2016/11/22/fileflake-distributed-file-server-for-laravel/">fileflake:适用于laravel框架的分布式文件存储服务</a>
+          </li>
+        
+          <li>
+            <a href="/2016/11/22/red-envelope-tech-detail/">抢红包背后的技术要点</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/29/red-envelope-assignment-algorithm/">一种红包分配算法及其实现</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/27/quick-sort-and-its-testing/">快速排序算法及其测试算法的原理与实现</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
 
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 LI Mengxiang<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
