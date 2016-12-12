@@ -1,240 +1,35 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  
-  <title>MongoDB还是MySQL？ | Mengxiang&#39;s blog</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="MongoDB和MySql是目前最常用的两种数据库。面对一个应用场景，选择Mongodb还是MySql，哪一个更合适？
-弄清两者的区别，就是对这个问题最好的回答。从schema、事务支持、关联查询三个方面进行说明。
-schemaschema可以理解为约束。MySql的每个数据表都有一个schema，指明了每个字段的类型，这些类型就是对写入数据的约束。例如，一个字段为int型的字段，写入”hello">
-<meta property="og:type" content="article">
-<meta property="og:title" content="MongoDB还是MySQL？">
-<meta property="og:url" content="http://limen.github.io/2016/09/17/mongodb-or-mysql/index.html">
-<meta property="og:site_name" content="Mengxiang's blog">
-<meta property="og:description" content="MongoDB和MySql是目前最常用的两种数据库。面对一个应用场景，选择Mongodb还是MySql，哪一个更合适？
-弄清两者的区别，就是对这个问题最好的回答。从schema、事务支持、关联查询三个方面进行说明。
-schemaschema可以理解为约束。MySql的每个数据表都有一个schema，指明了每个字段的类型，这些类型就是对写入数据的约束。例如，一个字段为int型的字段，写入”hello">
-<meta property="og:updated_time" content="2016-12-12T06:33:08.098Z">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="MongoDB还是MySQL？">
-<meta name="twitter:description" content="MongoDB和MySql是目前最常用的两种数据库。面对一个应用场景，选择Mongodb还是MySql，哪一个更合适？
-弄清两者的区别，就是对这个问题最好的回答。从schema、事务支持、关联查询三个方面进行说明。
-schemaschema可以理解为约束。MySql的每个数据表都有一个schema，指明了每个字段的类型，这些类型就是对写入数据的约束。例如，一个字段为int型的字段，写入”hello">
-  
-    <link rel="alternate" href="/atom.xml" title="Mengxiang&#39;s blog" type="application/atom+xml">
-  
-  
-    <link rel="icon" href="/favicon.png">
-  
-  
-    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
-  
-  <link rel="stylesheet" href="/css/style.css">
-  
+extends partial/base
 
-</head>
-
-<body>
-  <div id="container">
-    <div id="wrap">
-      <header id="header">
-  <div id="banner"></div>
-  <div id="header-outer" class="outer">
-    <div id="header-title" class="inner">
-      <h1 id="logo-wrap">
-        <a href="/" id="logo">Mengxiang&#39;s blog</a>
-      </h1>
-      
-    </div>
-    <div id="header-inner" class="inner">
-      <nav id="main-nav">
-        <a id="main-nav-toggle" class="nav-icon"></a>
-        
-          <a class="main-nav-link" href="/">Home</a>
-        
-          <a class="main-nav-link" href="/archives">Archives</a>
-        
-      </nav>
-      <nav id="sub-nav">
-        
-          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
-        
-        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
-      </nav>
-      <div id="search-form-wrap">
-        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://limen.github.io"></form>
-      </div>
-    </div>
-  </div>
-</header>
-      <div class="outer">
-        <section id="main"><article id="post-mongodb-or-mysql" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/09/17/mongodb-or-mysql/" class="article-date">
-  <time datetime="2016-09-16T16:00:00.000Z" itemprop="datePublished">09/17 2016</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 class="article-title" itemprop="name">
-      MongoDB还是MySQL？
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>MongoDB和MySql是目前最常用的两种数据库。面对一个应用场景，选择Mongodb还是MySql，哪一个更合适？</p>
-<p>弄清两者的区别，就是对这个问题最好的回答。从schema、事务支持、关联查询三个方面进行说明。</p>
-<h2 id="schema"><a href="#schema" class="headerlink" title="schema"></a>schema</h2><p>schema可以理解为约束。MySql的每个数据表都有一个schema，指明了每个字段的类型，这些类型就是对写入数据的约束。例如，一个字段为int型的字段，写入”helloworld”就会因类型不匹配而报错，导致写入失败；一个int unsigned类型的字段，写入-1同样会报错。</p>
-<p>schema除了可以约束字段类型，还可以约束索引。例如建立一个唯一索引（userid，classid），假定数据库中已经有一条（userid=100，classid=1）的记录，如果此时再尝试写入一条userid=100，classid=1的数据，就会因为违反了唯一索引的限制而导致写入失败。</p>
-<p>MongoDB作为一种schemaless的数据库，对写入的数据是没有类型限制的，这一点也是MongoDB与MySql之间最重要的一个区别。</p>
-<p>如果一个应用的数据结构比较固定，需要约束字段类型和索引，则选用MySQL是合适的，反之则应该选用MongoDB。</p>
-<h2 id="事务支持"><a href="#事务支持" class="headerlink" title="事务支持"></a>事务支持</h2><p>MySQL的InnoDB存储引擎支持事务，这使得MySQL适合那些对一致性要求较高的应用，在代码运行异常或出现业务异常时可以及时回滚。</p>
-<p>截至目前最新的3.2版本，MongoDB还不支持事务。</p>
-<p>如果一个应用场景需要更新多个表，在发生异常时需回滚数据，未发生异常时提交数据，选用MySQL是合适的。</p>
-<h2 id="关联查询"><a href="#关联查询" class="headerlink" title="关联查询"></a>关联查询</h2><p>MySQL作为一种关系型数据库，天然支持联表查询。如果一个应用的数据结构需拆分成多个表，且表之间有关联关系，应选用MySQL。</p>
-<p>Mongodb（&lt;=3.2）不支持联表查询，这意味着一个查询只能针对一个表。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://limen.github.io/2016/09/17/mongodb-or-mysql/" data-id="ciwlpo5h60005b4s8fkribz9m" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/数据库/">数据库</a></li></ul>
-
-    </footer>
-  </div>
-  
-    
-<nav id="article-nav">
-  
-    <a href="/2016/09/27/quick-sort-and-its-testing/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          快速排序算法及其测试算法的原理与实现
-        
-      </div>
-    </a>
-  
-  
-    <a href="/2016/09/15/database-design-principles/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">数据库设计的重要性与几个原则</div>
-    </a>
-  
-</nav>
-
-  
-</article>
-
-</section>
-        
-          <aside id="sidebar">
-  
-    
-
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">标签</h3>
-    <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/laravel/">laravel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/并发/">并发</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/开源/">开源</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/悲观锁/">悲观锁</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据库/">数据库</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/文件存储/">文件存储</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/架构/">架构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/缓存/">缓存</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/重构/">重构</a></li></ul>
-    </div>
-  </div>
+include partial/post-meta
 
 
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">标签云</h3>
-    <div class="widget tagcloud">
-      <a href="/tags/laravel/" style="font-size: 15px;">laravel</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/并发/" style="font-size: 10px;">并发</a> <a href="/tags/开源/" style="font-size: 15px;">开源</a> <a href="/tags/悲观锁/" style="font-size: 10px;">悲观锁</a> <a href="/tags/数据库/" style="font-size: 20px;">数据库</a> <a href="/tags/文件存储/" style="font-size: 10px;">文件存储</a> <a href="/tags/架构/" style="font-size: 10px;">架构</a> <a href="/tags/算法/" style="font-size: 15px;">算法</a> <a href="/tags/缓存/" style="font-size: 10px;">缓存</a> <a href="/tags/重构/" style="font-size: 10px;">重构</a>
-    </div>
-  </div>
+block header
+    header.header-section
+        .intro-header.no-img
+            .container
+                .row
+                    .col-lg-8.col-lg-offset-2.col-md-10.col-md-offset-1
+                        .post-heading
+                            h1= page.title
+                            if page.subtitle
+                                h2.post-subheading= page.subtitle
+                            +post_meta(page.date, page.tags)
 
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">归档</h3>
-    <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a></li></ul>
-    </div>
-  </div>
+block content
+    .container
+        .row
+            .col-lg-8.col-lg-offset-2.col-md-10.col-md-offset-1
+                article(role="main", class="blog-post")
+                    != page.content
+                ul.pager.blog-pager
+                    if page.prev
+                        li.previous
+                            a(href=url_for(page.prev.path), data-toggle="tooltip", data-placement="top", title=page.prev.title)= __('prev_post')
+                    if page.next
+                        li.next
+                            a(href=url_for(page.next.path), data-toggle="tooltip", data-placement="top", title=page.next.title)= __('next_post')
 
-
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">最新文章</h3>
-    <div class="widget">
-      <ul>
-        
-          <li>
-            <a href="/2016/12/09/curd-model-for-redis-in-laravel-style/">CURD model for Redis in Laravel style</a>
-          </li>
-        
-          <li>
-            <a href="/2016/11/22/fileflake-distributed-file-server-for-laravel/">fileflake:适用于laravel框架的分布式文件存储服务</a>
-          </li>
-        
-          <li>
-            <a href="/2016/11/22/red-envelope-tech-detail/">抢红包背后的技术要点</a>
-          </li>
-        
-          <li>
-            <a href="/2016/09/29/red-envelope-assignment-algorithm/">一种红包分配算法及其实现</a>
-          </li>
-        
-          <li>
-            <a href="/2016/09/27/quick-sort-and-its-testing/">快速排序算法及其测试算法的原理与实现</a>
-          </li>
-        
-      </ul>
-    </div>
-  </div>
-
-  
-</aside>
-        
-      </div>
-      <footer id="footer">
-  
-  <div class="outer">
-    <div id="footer-info" class="inner">
-      &copy; 2016 LI Mengxiang<br>
-      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
-    </div>
-  </div>
-</footer>
-    </div>
-    <nav id="mobile-nav">
-  
-    <a href="/" class="mobile-nav-link">Home</a>
-  
-    <a href="/archives" class="mobile-nav-link">Archives</a>
-  
-</nav>
-    
-
-<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+                include partial/comment
 
 
-  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
-  <script src="/fancybox/jquery.fancybox.pack.js"></script>
 
-
-<script src="/js/script.js"></script>
-
-  </div>
-</body>
-</html>
