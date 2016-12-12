@@ -1,0 +1,263 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>抢红包背后的技术要点 | Mengxiang&#39;s blog</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="最近做了一个抢红包的项目，这个项目涉及到了后端开发的多个技术点
+
+应用层悲观锁
+数据库锁机制
+数据库事务
+数据库索引
+
+以上这些技术点都是为高并发场景服务的。
+应用层悲观锁为了使抢红包的请求能够依次处理，使用悲观锁将红包预先锁定。需要为该悲观锁设定一个最大生存时间，以确保发生不可预知的错误时，不会影响后续的用户抢红包。其余并发进入的请求将等待并争抢红包锁。一个请求处理完成，将红包解锁，下一个成功获">
+<meta property="og:type" content="article">
+<meta property="og:title" content="抢红包背后的技术要点">
+<meta property="og:url" content="http://limen.github.io/2016/11/22/red-envelope-tech-detail/index.html">
+<meta property="og:site_name" content="Mengxiang's blog">
+<meta property="og:description" content="最近做了一个抢红包的项目，这个项目涉及到了后端开发的多个技术点
+
+应用层悲观锁
+数据库锁机制
+数据库事务
+数据库索引
+
+以上这些技术点都是为高并发场景服务的。
+应用层悲观锁为了使抢红包的请求能够依次处理，使用悲观锁将红包预先锁定。需要为该悲观锁设定一个最大生存时间，以确保发生不可预知的错误时，不会影响后续的用户抢红包。其余并发进入的请求将等待并争抢红包锁。一个请求处理完成，将红包解锁，下一个成功获">
+<meta property="og:updated_time" content="2016-12-12T06:33:13.205Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="抢红包背后的技术要点">
+<meta name="twitter:description" content="最近做了一个抢红包的项目，这个项目涉及到了后端开发的多个技术点
+
+应用层悲观锁
+数据库锁机制
+数据库事务
+数据库索引
+
+以上这些技术点都是为高并发场景服务的。
+应用层悲观锁为了使抢红包的请求能够依次处理，使用悲观锁将红包预先锁定。需要为该悲观锁设定一个最大生存时间，以确保发生不可预知的错误时，不会影响后续的用户抢红包。其余并发进入的请求将等待并争抢红包锁。一个请求处理完成，将红包解锁，下一个成功获">
+  
+    <link rel="alternate" href="/atom.xml" title="Mengxiang&#39;s blog" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  
+    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div id="wrap">
+      <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">Mengxiang&#39;s blog</a>
+      </h1>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="/">Home</a>
+        
+          <a class="main-nav-link" href="/archives">Archives</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://limen.github.io"></form>
+      </div>
+    </div>
+  </div>
+</header>
+      <div class="outer">
+        <section id="main"><article id="post-red-envelope-tech-detail" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/2016/11/22/red-envelope-tech-detail/" class="article-date">
+  <time datetime="2016-11-21T16:00:00.000Z" itemprop="datePublished">11/22 2016</time>
+</a>
+    
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      抢红包背后的技术要点
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>最近做了一个抢红包的项目，这个项目涉及到了后端开发的多个技术点</p>
+<ul>
+<li>应用层悲观锁</li>
+<li>数据库锁机制</li>
+<li>数据库事务</li>
+<li>数据库索引</li>
+</ul>
+<p>以上这些技术点都是为高并发场景服务的。</p>
+<h3 id="应用层悲观锁"><a href="#应用层悲观锁" class="headerlink" title="应用层悲观锁"></a>应用层悲观锁</h3><p>为了使抢红包的请求能够依次处理，使用悲观锁将红包预先锁定。需要为该悲观锁设定一个最大生存时间，以确保发生不可预知的错误时，不会影响后续的用户抢红包。其余并发进入的请求将等待并争抢红包锁。一个请求处理完成，将红包解锁，下一个成功获取锁的请求将被处理。</p>
+<p>处在等待状态的请求不断争抢红包锁。需设定一个最大重试次数，超时则请求处理过程结束。</p>
+<p>实现悲观锁的方案有多种，这里采用了redis的原子操作setnx，setnx返回1代表争抢成功。</p>
+<h3 id="数据库锁机制"><a href="#数据库锁机制" class="headerlink" title="数据库锁机制"></a>数据库锁机制</h3><p>使用SELECT FOR UPDATE为数据加锁，保证同一时刻只能有一个请求更新数据。在应用层悲观锁的保护下，数据库锁争用、幻读的现象可以减少甚至避免，这样也降低了数据库本身的压力。</p>
+<h3 id="数据库事务"><a href="#数据库事务" class="headerlink" title="数据库事务"></a>数据库事务</h3><p>抢红包涉及到金钱，在发生异常时需回滚，保证数据一致性。</p>
+<h3 id="数据库索引"><a href="#数据库索引" class="headerlink" title="数据库索引"></a>数据库索引</h3><p>合理利用数据库索引可以避免不期望的结果。</p>
+<p>红包的数据库采用了MySql，分两个表，主表和抢红包记录表。每个用户被限定最多只能抢一次红包，抢红包记录表中的唯一索引（红包id，用户id）可以避免发生意外。</p>
+<p>经过应用层悲观锁、数据库锁的保护，发生这种意外的可能性已经微乎其微了。</p>
+
+      
+    </div>
+    <footer class="article-footer">
+      <a data-url="http://limen.github.io/2016/11/22/red-envelope-tech-detail/" data-id="ciwlw2b4r000b0hs8ta3jprx6" class="article-share-link">Share</a>
+      
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/并发/">并发</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/悲观锁/">悲观锁</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/数据库/">数据库</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/2016/11/22/fileflake-distributed-file-server-for-laravel/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Newer</strong>
+      <div class="article-nav-title">
+        
+          fileflake:适用于laravel框架的分布式文件存储服务
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/09/29/red-envelope-assignment-algorithm/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">Older</strong>
+      <div class="article-nav-title">一种红包分配算法及其实现</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+</section>
+        
+          <aside id="sidebar">
+  
+    
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/laravel/">laravel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/并发/">并发</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/开源/">开源</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/悲观锁/">悲观锁</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据库/">数据库</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/文件存储/">文件存储</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/架构/">架构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/缓存/">缓存</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/重构/">重构</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/laravel/" style="font-size: 15px;">laravel</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/并发/" style="font-size: 10px;">并发</a> <a href="/tags/开源/" style="font-size: 15px;">开源</a> <a href="/tags/悲观锁/" style="font-size: 10px;">悲观锁</a> <a href="/tags/数据库/" style="font-size: 20px;">数据库</a> <a href="/tags/文件存储/" style="font-size: 10px;">文件存储</a> <a href="/tags/架构/" style="font-size: 10px;">架构</a> <a href="/tags/算法/" style="font-size: 15px;">算法</a> <a href="/tags/缓存/" style="font-size: 10px;">缓存</a> <a href="/tags/重构/" style="font-size: 10px;">重构</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a></li></ul>
+    </div>
+  </div>
+
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">最新文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/2016/12/09/curd-model-for-redis-in-laravel-style/">CURD model for Redis in Laravel style</a>
+          </li>
+        
+          <li>
+            <a href="/2016/11/22/fileflake-distributed-file-server-for-laravel/">fileflake:适用于laravel框架的分布式文件存储服务</a>
+          </li>
+        
+          <li>
+            <a href="/2016/11/22/red-envelope-tech-detail/">抢红包背后的技术要点</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/29/red-envelope-assignment-algorithm/">一种红包分配算法及其实现</a>
+          </li>
+        
+          <li>
+            <a href="/2016/09/27/quick-sort-and-its-testing/">快速排序算法及其测试算法的原理与实现</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+</aside>
+        
+      </div>
+      <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2016 LI Mengxiang<br>
+      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
+    </div>
+  </div>
+</footer>
+    </div>
+    <nav id="mobile-nav">
+  
+    <a href="/" class="mobile-nav-link">Home</a>
+  
+    <a href="/archives" class="mobile-nav-link">Archives</a>
+  
+</nav>
+    
+
+<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+
+
+  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
+  <script src="/fancybox/jquery.fancybox.pack.js"></script>
+
+
+<script src="/js/script.js"></script>
+
+  </div>
+</body>
+</html>
