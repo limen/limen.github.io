@@ -1,288 +1,35 @@
-<!DOCTYPE html>
-<html>
-<head>
-  <meta charset="utf-8">
-  
-  <title>代码重构之解耦合 | Mengxiang&#39;s blog</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="最近在对业务代码进行重构，遇到了一些比较典型的“散发着难闻味道”的代码，可以用又臭又长来形容。
-这部分的业务是发布动态，包括以下步骤：
+extends partial/base
 
-敏感词过滤
-话题提取
-动态数据入库
-敏感词记录
-话题及话题动态关联关系入库
-
-之所以说重构前的代码“又臭又长”，首先最直观的一点，方法的行数超过了200行，其次上面四个步骤的逻辑全都写在了一起，没有按功能模块拆分，这也是方法过长的原因。
-如果按功能划分，发布动态">
-<meta property="og:type" content="article">
-<meta property="og:title" content="代码重构之解耦合">
-<meta property="og:url" content="http://limen.github.io/2016/08/23/refactor-decouple/index.html">
-<meta property="og:site_name" content="Mengxiang's blog">
-<meta property="og:description" content="最近在对业务代码进行重构，遇到了一些比较典型的“散发着难闻味道”的代码，可以用又臭又长来形容。
-这部分的业务是发布动态，包括以下步骤：
-
-敏感词过滤
-话题提取
-动态数据入库
-敏感词记录
-话题及话题动态关联关系入库
-
-之所以说重构前的代码“又臭又长”，首先最直观的一点，方法的行数超过了200行，其次上面四个步骤的逻辑全都写在了一起，没有按功能模块拆分，这也是方法过长的原因。
-如果按功能划分，发布动态">
-<meta property="og:image" content="http://upload-images.jianshu.io/upload_images/920803-890e52a28616f911?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
-<meta property="og:updated_time" content="2016-12-12T06:33:14.934Z">
-<meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="代码重构之解耦合">
-<meta name="twitter:description" content="最近在对业务代码进行重构，遇到了一些比较典型的“散发着难闻味道”的代码，可以用又臭又长来形容。
-这部分的业务是发布动态，包括以下步骤：
-
-敏感词过滤
-话题提取
-动态数据入库
-敏感词记录
-话题及话题动态关联关系入库
-
-之所以说重构前的代码“又臭又长”，首先最直观的一点，方法的行数超过了200行，其次上面四个步骤的逻辑全都写在了一起，没有按功能模块拆分，这也是方法过长的原因。
-如果按功能划分，发布动态">
-<meta name="twitter:image" content="http://upload-images.jianshu.io/upload_images/920803-890e52a28616f911?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240">
-  
-    <link rel="alternate" href="/atom.xml" title="Mengxiang&#39;s blog" type="application/atom+xml">
-  
-  
-    <link rel="icon" href="/favicon.png">
-  
-  
-    <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
-  
-  <link rel="stylesheet" href="/css/style.css">
-  
-
-</head>
-
-<body>
-  <div id="container">
-    <div id="wrap">
-      <header id="header">
-  <div id="banner"></div>
-  <div id="header-outer" class="outer">
-    <div id="header-title" class="inner">
-      <h1 id="logo-wrap">
-        <a href="/" id="logo">Mengxiang&#39;s blog</a>
-      </h1>
-      
-    </div>
-    <div id="header-inner" class="inner">
-      <nav id="main-nav">
-        <a id="main-nav-toggle" class="nav-icon"></a>
-        
-          <a class="main-nav-link" href="/">Home</a>
-        
-          <a class="main-nav-link" href="/archives">Archives</a>
-        
-      </nav>
-      <nav id="sub-nav">
-        
-          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
-        
-        <a id="nav-search-btn" class="nav-icon" title="搜索"></a>
-      </nav>
-      <div id="search-form-wrap">
-        <form action="//google.com/search" method="get" accept-charset="UTF-8" class="search-form"><input type="search" name="q" results="0" class="search-form-input" placeholder="Search"><button type="submit" class="search-form-submit">&#xF002;</button><input type="hidden" name="sitesearch" value="http://limen.github.io"></form>
-      </div>
-    </div>
-  </div>
-</header>
-      <div class="outer">
-        <section id="main"><article id="post-refactor-decouple" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-meta">
-    <a href="/2016/08/23/refactor-decouple/" class="article-date">
-  <time datetime="2016-08-22T16:00:00.000Z" itemprop="datePublished">08/23 2016</time>
-</a>
-    
-  </div>
-  <div class="article-inner">
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 class="article-title" itemprop="name">
-      代码重构之解耦合
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>最近在对业务代码进行重构，遇到了一些比较典型的“散发着难闻味道”的代码，可以用又臭又长来形容。</p>
-<p>这部分的业务是发布动态，包括以下步骤：</p>
-<ul>
-<li>敏感词过滤</li>
-<li>话题提取</li>
-<li>动态数据入库</li>
-<li>敏感词记录</li>
-<li>话题及话题动态关联关系入库</li>
-</ul>
-<p>之所以说重构前的代码“又臭又长”，首先最直观的一点，方法的行数超过了200行，其次上面四个步骤的逻辑全都写在了一起，没有按功能模块拆分，这也是方法过长的原因。</p>
-<p>如果按功能划分，发布动态包含三个模块：</p>
-<ul>
-<li>敏感词模块</li>
-<li>动态模块</li>
-<li>话题模块</li>
-</ul>
-<p>其中的<strong>敏感词模块</strong>和<strong>话题模块</strong>都是为<strong>动态模块</strong>服务的。一个动态可以有敏感词，也可以没有敏感词，比如用户分享一个链接，这就不需要做敏感词过滤与记录了，所以敏感词模块与动态模块应该是“<strong>松耦合</strong>”的。同样，一个动态可以包含话题，也可能不包含，所以话题模块与动态模块也应该是松耦合的。</p>
-<p>既然敏感词模块与话题模块都是为动态模块服务的，动态模块就有必要与这两个服务模块建立一个<strong>服务约定</strong>：</p>
-<ul>
-<li>我需要什么样的服务</li>
-<li>我们之间如何建立耦合关系</li>
-</ul>
-<h2 id="我需要什么样的服务"><a href="#我需要什么样的服务" class="headerlink" title="我需要什么样的服务"></a>我需要什么样的服务</h2><p>在编程的世界里，约定可以抽象成接口<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">interface</span> <span class="title">PublishContract</span></span></div><div class="line">&#123;</div><div class="line">    <span class="comment">// Call this method before publishing</span></div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">beforePublish</span><span class="params">()</span></span>;</div><div class="line">    </div><div class="line">    <span class="comment">// Call this method after publishing</span></div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">afterPublish</span><span class="params">()</span></span>;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>对于敏感词模块和话题模块，只需要实现该接口，动态模块就可以根据约定调用它们提供的服务。</p>
-<figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">SensitiveWords</span> <span class="keyword">implements</span> <span class="title">PublishContract</span></span></div><div class="line">&#123;</div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">beforePublish</span><span class="params">()</span></span></div><div class="line">    &#123;</div><div class="line">        <span class="comment">// </span></div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">afterPublish</span><span class="params">()</span></span></div><div class="line">    &#123;</div><div class="line">        <span class="comment">//</span></div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">TopicObserver</span> <span class="keyword">implements</span> <span class="title">PublishContract</span></span></div><div class="line">&#123;</div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">beforePublish</span><span class="params">()</span></span></div><div class="line">    &#123;</div><div class="line">        <span class="comment">// </span></div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">afterPublish</span><span class="params">()</span></span></div><div class="line">    &#123;</div><div class="line">        <span class="comment">//</span></div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>这样动态模块就知道，在动态入库前调用服务模块的beforePublish服务，入库后调用服务模块的afterPublish服务。</p>
-<h2 id="我们如何建立耦合"><a href="#我们如何建立耦合" class="headerlink" title="我们如何建立耦合"></a>我们如何建立耦合</h2><p>耦合关系的建立应该由动态发布的调用方决定，动态模块需提供相应的接口，<br><figure class="highlight php"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">class</span> <span class="title">Feeds</span></span></div><div class="line">&#123;</div><div class="line">    <span class="comment">// PublishContract[]</span></div><div class="line">    <span class="keyword">protected</span> $serviceModules = [];</div><div class="line">    </div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">addServiceModule</span><span class="params">(PublishContract $service)</span></span></div><div class="line">    &#123;</div><div class="line">        <span class="keyword">$this</span>-&gt;serviceModules[get_class($service)] = $service;</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">removeServiceModule</span><span class="params">($serviceClassName)</span></span></div><div class="line">    &#123;</div><div class="line">        <span class="keyword">unset</span>(<span class="keyword">$this</span>-&gt;serviceModules[$serviceClassName]);</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    <span class="keyword">public</span> <span class="function"><span class="keyword">function</span> <span class="title">publish</span><span class="params">()</span></span></div><div class="line">    &#123;</div><div class="line">        <span class="keyword">foreach</span> (<span class="keyword">$this</span>-&gt;serviceModules <span class="keyword">as</span> $service) &#123;</div><div class="line">            $service-&gt;beforePublish();</div><div class="line">        &#125;</div><div class="line">        </div><div class="line">        <span class="comment">// do something about publishment</span></div><div class="line">        </div><div class="line">        <span class="keyword">foreach</span> (<span class="keyword">$this</span>-&gt;serviceModules <span class="keyword">as</span> $service) &#123;</div><div class="line">            $service-&gt;afterPublish();</div><div class="line">        &#125;</div><div class="line">    </div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>这样，动态发布的调用方可以通过addServiceModule/removeServiceModule动态地添加/删除服务模块。</p>
-<h2 id="UML图"><a href="#UML图" class="headerlink" title="UML图"></a>UML图</h2><p><img src="http://upload-images.jianshu.io/upload_images/920803-890e52a28616f911?imageMogr2/auto-orient/strip%7CimageView2/2/w/1240" alt="[from processon.com](https://www.processon.com/i/5429053c0cf2e6eabf125bb8 &quot;&quot;)"></p>
-<h2 id="重构带来的好处"><a href="#重构带来的好处" class="headerlink" title="重构带来的好处"></a>重构带来的好处</h2><h3 id="松耦合"><a href="#松耦合" class="headerlink" title="松耦合"></a>松耦合</h3><p>服务模块与核心模块是独立的，通过接口建立松耦合的关系；可动态添加/删除服务模块。</p>
-<h3 id="易于维护"><a href="#易于维护" class="headerlink" title="易于维护"></a>易于维护</h3><p>服务模块的修改不会直接影响核心模块。</p>
-<h3 id="易于扩展"><a href="#易于扩展" class="headerlink" title="易于扩展"></a>易于扩展</h3><p>如果需要添加其它服务模块，只需实现服务约定的接口，并将新的服务模块动态添加到核心模块即可。</p>
-
-      
-    </div>
-    <footer class="article-footer">
-      <a data-url="http://limen.github.io/2016/08/23/refactor-decouple/" data-id="ciwlqbcmd000bhxs8vw5m5qha" class="article-share-link">Share</a>
-      
-      
-  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/重构/">重构</a></li></ul>
-
-    </footer>
-  </div>
-  
-    
-<nav id="article-nav">
-  
-    <a href="/2016/09/15/database-design-principles/" id="article-nav-newer" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Newer</strong>
-      <div class="article-nav-title">
-        
-          数据库设计的重要性与几个原则
-        
-      </div>
-    </a>
-  
-  
-    <a href="/2016/07/29/database-outernal-cache-and-read-speed-improvement/" id="article-nav-older" class="article-nav-link-wrap">
-      <strong class="article-nav-caption">Older</strong>
-      <div class="article-nav-title">为数据库添加外部缓存带来的性能提升分析</div>
-    </a>
-  
-</nav>
-
-  
-</article>
-
-</section>
-        
-          <aside id="sidebar">
-  
-    
-
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">标签</h3>
-    <div class="widget">
-      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/laravel/">laravel</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/redis/">redis</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/并发/">并发</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/开源/">开源</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/悲观锁/">悲观锁</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据库/">数据库</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/文件存储/">文件存储</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/架构/">架构</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/缓存/">缓存</a></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/重构/">重构</a></li></ul>
-    </div>
-  </div>
+include partial/post-meta
 
 
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">标签云</h3>
-    <div class="widget tagcloud">
-      <a href="/tags/laravel/" style="font-size: 15px;">laravel</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/并发/" style="font-size: 10px;">并发</a> <a href="/tags/开源/" style="font-size: 15px;">开源</a> <a href="/tags/悲观锁/" style="font-size: 10px;">悲观锁</a> <a href="/tags/数据库/" style="font-size: 20px;">数据库</a> <a href="/tags/文件存储/" style="font-size: 10px;">文件存储</a> <a href="/tags/架构/" style="font-size: 10px;">架构</a> <a href="/tags/算法/" style="font-size: 15px;">算法</a> <a href="/tags/缓存/" style="font-size: 10px;">缓存</a> <a href="/tags/重构/" style="font-size: 10px;">重构</a>
-    </div>
-  </div>
+block header
+    header.header-section
+        .intro-header.no-img
+            .container
+                .row
+                    .col-lg-8.col-lg-offset-2.col-md-10.col-md-offset-1
+                        .post-heading
+                            h1= page.title
+                            if page.subtitle
+                                h2.post-subheading= page.subtitle
+                            +post_meta(page.date, page.tags)
 
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">归档</h3>
-    <div class="widget">
-      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/12/">十二月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/09/">九月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a></li></ul>
-    </div>
-  </div>
+block content
+    .container
+        .row
+            .col-lg-8.col-lg-offset-2.col-md-10.col-md-offset-1
+                article(role="main", class="blog-post")
+                    != page.content
+                ul.pager.blog-pager
+                    if page.prev
+                        li.previous
+                            a(href=url_for(page.prev.path), data-toggle="tooltip", data-placement="top", title=page.prev.title)= __('prev_post')
+                    if page.next
+                        li.next
+                            a(href=url_for(page.next.path), data-toggle="tooltip", data-placement="top", title=page.next.title)= __('next_post')
 
-
-  
-    
-  <div class="widget-wrap">
-    <h3 class="widget-title">最新文章</h3>
-    <div class="widget">
-      <ul>
-        
-          <li>
-            <a href="/2016/12/09/curd-model-for-redis-in-laravel-style/">CURD model for Redis in Laravel style</a>
-          </li>
-        
-          <li>
-            <a href="/2016/11/22/fileflake-distributed-file-server-for-laravel/">fileflake:适用于laravel框架的分布式文件存储服务</a>
-          </li>
-        
-          <li>
-            <a href="/2016/11/22/red-envelope-tech-detail/">抢红包背后的技术要点</a>
-          </li>
-        
-          <li>
-            <a href="/2016/09/29/red-envelope-assignment-algorithm/">一种红包分配算法及其实现</a>
-          </li>
-        
-          <li>
-            <a href="/2016/09/27/quick-sort-and-its-testing/">快速排序算法及其测试算法的原理与实现</a>
-          </li>
-        
-      </ul>
-    </div>
-  </div>
-
-  
-</aside>
-        
-      </div>
-      <footer id="footer">
-  
-  <div class="outer">
-    <div id="footer-info" class="inner">
-      &copy; 2016 LI Mengxiang<br>
-      Powered by <a href="http://hexo.io/" target="_blank">Hexo</a>
-    </div>
-  </div>
-</footer>
-    </div>
-    <nav id="mobile-nav">
-  
-    <a href="/" class="mobile-nav-link">Home</a>
-  
-    <a href="/archives" class="mobile-nav-link">Archives</a>
-  
-</nav>
-    
-
-<script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.3/jquery.min.js"></script>
+                include partial/comment
 
 
-  <link rel="stylesheet" href="/fancybox/jquery.fancybox.css">
-  <script src="/fancybox/jquery.fancybox.pack.js"></script>
 
-
-<script src="/js/script.js"></script>
-
-  </div>
-</body>
-</html>
